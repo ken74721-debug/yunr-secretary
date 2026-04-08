@@ -1,0 +1,2675 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>芸兒小秘書</title>
+<!-- v1775273781 -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg:#F7F6F2;--surface:#FFFFFF;--border:#E4E2DA;--border2:#D0CEC4;
+  --text:#1A1916;--muted:#7A786E;--hint:#B0AEA6;
+  --accent:#3D35A8;--accent-l:#EEEDFE;--accent-m:#7F77DD;
+  --success:#0F6E56;--success-l:#E1F5EE;
+  --warn:#854F0B;--warn-l:#FAEEDA;
+  --danger:#A32D2D;--danger-l:#FCEBEB;
+  --info:#185FA5;--info-l:#E6F1FB;
+  --radius:10px;--radius-lg:14px;
+  --font:'DM Sans',system-ui,sans-serif;--mono:'DM Mono',monospace;
+  --sidebar-w:220px;--trans:.15s ease;
+}
+[data-theme="dark"]{
+  --bg:#141412;--surface:#1E1D1A;--border:#2E2C28;--border2:#3E3C38;
+  --text:#F0EEE8;--muted:#8A8880;--hint:#5A5852;
+  --accent:#7F77DD;--accent-l:#26215C;--accent-m:#AFA9EC;
+  --success:#1D9E75;--success-l:#04342C;
+  --warn:#EF9F27;--warn-l:#412402;
+  --danger:#E24B4A;--danger-l:#501313;
+  --info:#378ADD;--info-l:#042C53;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+
+.shell{display:flex;height:100vh}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{height:56px;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px}
+.content{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px}
+
+.sidebar-logo{padding:18px 16px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.logo-mark{width:26px;height:26px;border-radius:7px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-mark svg{fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round}
+.logo-title{font-size:13px;font-weight:500;color:var(--text);display:block}
+.logo-sub{font-size:11px;color:var(--hint);display:block;margin-top:1px}
+.nav-section{padding:14px 16px 4px;font-size:10px;font-weight:500;color:var(--hint);letter-spacing:.08em;text-transform:uppercase}
+.nav-item{margin:1px 8px;padding:7px 10px;border-radius:8px;font-size:13px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:8px;transition:background var(--trans),color var(--trans);user-select:none}
+.nav-item:hover{background:var(--bg);color:var(--text)}
+.nav-item.active{background:var(--accent-l);color:var(--accent);font-weight:500}
+.nav-item.disabled{opacity:.35;cursor:default;pointer-events:none}
+.nav-item svg{width:15px;height:15px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nav-badge{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;font-weight:500;padding:1px 6px;border-radius:10px;min-width:18px;text-align:center}
+.sidebar-footer{margin-top:auto;padding:12px 8px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.theme-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:none;cursor:pointer;color:var(--muted);display:flex;align-items:center;justify-content:center;transition:background var(--trans)}
+.theme-btn:hover{background:var(--bg)}
+.theme-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round}
+
+.topbar-info{flex:1;min-width:0}
+.topbar-title{font-size:15px;font-weight:500;color:var(--text)}
+.topbar-date{font-size:11px;color:var(--hint)}
+.topbar-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:13px;font-family:var(--font);border:1px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;transition:background var(--trans),border-color var(--trans),transform .1s;white-space:nowrap;font-weight:400}
+.btn:hover{background:var(--bg)}
+.btn:active{transform:scale(.98)}
+.btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{background:#3028a0;border-color:#3028a0}
+.btn-ghost{border-color:transparent;background:transparent}
+.btn-ghost:hover{background:var(--bg)}
+.btn-sm{padding:4px 10px;font-size:12px}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
+.stat-label{font-size:11px;color:var(--hint);margin-bottom:4px;font-weight:500;text-transform:uppercase;letter-spacing:.05em}
+.stat-val{font-size:26px;font-weight:300;color:var(--text);line-height:1;margin-bottom:2px;font-family:var(--mono)}
+.stat-sub{font-size:11px;color:var(--muted)}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.card-head{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.card-title{font-size:13px;font-weight:500;color:var(--text)}
+
+.tag{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500;white-space:nowrap}
+.tg-p{background:var(--accent-l);color:var(--accent)}
+.tg-t{background:var(--success-l);color:var(--success)}
+.tg-a{background:var(--warn-l);color:var(--warn)}
+.tg-b{background:var(--info-l);color:var(--info)}
+.tg-d{background:var(--danger-l);color:var(--danger)}
+
+.filter-row{display:flex;gap:4px}
+.fpill{padding:3px 10px;border-radius:20px;font-size:12px;border:1px solid var(--border);cursor:pointer;color:var(--muted);background:transparent;transition:all var(--trans)}
+.fpill:hover{border-color:var(--border2);color:var(--text)}
+.fpill.active{background:var(--accent-l);border-color:var(--accent);color:var(--accent);font-weight:500}
+
+/* ── View toggle ── */
+.view-toggle{display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.vt-btn{padding:5px 12px;font-size:12px;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:var(--font);display:flex;align-items:center;gap:5px;transition:background var(--trans),color var(--trans)}
+.vt-btn:hover{background:var(--bg);color:var(--text)}
+.vt-btn.active{background:var(--accent-l);color:var(--accent);font-weight:500}
+.vt-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round}
+
+/* ── Kanban ── */
+.kanban-board{display:flex;gap:14px;overflow-x:auto;padding:16px;min-height:420px}
+.kanban-board::-webkit-scrollbar{height:4px}
+.kanban-board::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.kanban-col{width:240px;flex-shrink:0;display:flex;flex-direction:column;gap:8px}
+.kanban-col-head{display:flex;align-items:center;justify-content:space-between;padding:8px 4px;margin-bottom:2px}
+.kanban-col-title{font-size:12px;font-weight:500;display:flex;align-items:center;gap:6px}
+.col-dot{width:8px;height:8px;border-radius:50%}
+.kanban-count{font-size:11px;color:var(--hint);background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1px 7px;font-family:var(--mono)}
+.kanban-add{padding:6px 8px;border-radius:8px;font-size:12px;color:var(--hint);cursor:pointer;display:flex;align-items:center;gap:4px;transition:background var(--trans),color var(--trans)}
+.kanban-add:hover{background:var(--bg);color:var(--muted)}
+.kanban-add svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+
+.kcard{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:12px;cursor:pointer;transition:border-color var(--trans),transform .1s;
+  position:relative;
+}
+.kcard:hover{border-color:var(--border2);transform:translateY(-1px)}
+.kcard-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:8px;line-height:1.4}
+.kcard-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.kcard-foot{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+.kcard-due{font-size:11px;color:var(--hint);font-family:var(--mono)}
+.kcard-due.ov{color:var(--danger)}
+.priority-bar{position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:var(--radius) 0 0 var(--radius)}
+.kcard-comments{font-size:11px;color:var(--hint);display:flex;align-items:center;gap:3px}
+.kcard-comments svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8}
+.drag-over{border-color:var(--accent)!important;background:var(--accent-l)!important}
+.drag-ghost{opacity:.4}
+
+/* ── Gantt ── */
+.gantt-wrap{padding:0;overflow-x:auto}
+.gantt-table{width:100%;border-collapse:collapse;min-width:700px}
+.gantt-table th{font-size:11px;font-weight:500;color:var(--hint);padding:8px 12px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;background:var(--bg)}
+.gantt-table td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.gantt-table tr:last-child td{border-bottom:none}
+.gantt-table tr:hover td{background:var(--bg)}
+.gantt-name-cell{font-size:13px;color:var(--text);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gantt-bar-cell{padding:8px 0}
+.gantt-bar-wrap{position:relative;height:22px;background:var(--bg);border-radius:4px;overflow:hidden;margin:0 8px}
+.gantt-bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding:0 8px;transition:width .4s ease}
+.gantt-bar-label{font-size:10px;font-weight:500;color:#fff;white-space:nowrap;overflow:hidden;font-family:var(--mono)}
+.gantt-pct{font-size:12px;font-family:var(--mono);color:var(--muted);text-align:right;width:36px}
+.gantt-status{font-size:11px;font-weight:500;padding:2px 8px;border-radius:10px}
+.st-on{background:var(--success-l);color:var(--success)}
+.st-at{background:var(--warn-l);color:var(--warn)}
+.st-de{background:var(--danger-l);color:var(--danger)}
+.st-dn{background:var(--bg);color:var(--hint);border:1px solid var(--border)}
+
+/* ── Detail panel (slide-in) ── */
+.detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:150;display:flex;justify-content:flex-end;animation:fadein .15s ease}
+.detail-panel{width:400px;max-width:95vw;background:var(--surface);height:100%;overflow-y:auto;border-left:1px solid var(--border);display:flex;flex-direction:column;animation:slidepanel .2s ease}
+@keyframes slidepanel{from{transform:translateX(30px);opacity:0}to{transform:none;opacity:1}}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+.detail-head{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-shrink:0}
+.detail-title{font-size:15px;font-weight:500;color:var(--text);line-height:1.4;flex:1}
+.close-btn{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);flex-shrink:0;transition:background var(--trans)}
+.close-btn:hover{background:var(--bg)}
+.close-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.detail-body{padding:16px 20px;flex:1;display:flex;flex-direction:column;gap:16px;overflow-y:auto}
+.detail-section{display:flex;flex-direction:column;gap:6px}
+.detail-section-title{font-size:11px;font-weight:500;color:var(--hint);text-transform:uppercase;letter-spacing:.06em}
+.detail-meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.detail-meta-item{background:var(--bg);border-radius:8px;padding:10px 12px}
+.detail-meta-label{font-size:11px;color:var(--hint);margin-bottom:3px}
+.detail-meta-val{font-size:13px;font-weight:500;color:var(--text)}
+
+/* progress edit */
+.progress-edit{display:flex;align-items:center;gap:10px}
+.progress-edit input[type=range]{flex:1;accent-color:var(--accent)}
+.progress-edit span{font-size:12px;font-family:var(--mono);color:var(--text);width:32px;text-align:right}
+
+/* Comments */
+.comments-list{display:flex;flex-direction:column;gap:10px}
+.comment-item{display:flex;gap:8px}
+.comment-avatar{width:28px;height:28px;border-radius:50%;background:var(--accent-l);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--accent);flex-shrink:0}
+.comment-body{flex:1;min-width:0}
+.comment-meta{font-size:11px;color:var(--hint);margin-bottom:3px;display:flex;gap:6px}
+.comment-author{font-weight:500;color:var(--muted)}
+.comment-text{font-size:13px;color:var(--text);line-height:1.5;word-break:break-word}
+.comment-add-row{display:flex;gap:8px;margin-top:4px;align-items:flex-end}
+.comment-input{flex:1;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;font-family:var(--font);background:var(--surface);color:var(--text);outline:none;resize:none;transition:border-color var(--trans);line-height:1.5}
+.comment-input:focus{border-color:var(--accent)}
+.comment-input::placeholder{color:var(--hint)}
+
+/* ── Todo styles ── */
+.todo-item{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background var(--trans)}
+.todo-item:last-child{border-bottom:none}
+.todo-item:hover{background:var(--bg)}
+.todo-item.done .todo-text{text-decoration:line-through;color:var(--hint)}
+.check-ring{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all var(--trans);cursor:pointer}
+.check-ring:hover{border-color:var(--accent)}
+.check-ring.checked{background:var(--accent);border-color:var(--accent)}
+.check-ring svg{width:10px;height:10px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;opacity:0;transition:opacity var(--trans)}
+.check-ring.checked svg{opacity:1}
+.pdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.ph{background:var(--danger)}.pm{background:var(--warn)}.pl{background:var(--success)}
+.todo-text{flex:1;font-size:13px;color:var(--text);line-height:1.4}
+.todo-meta{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.due-txt{font-size:11px;color:var(--hint);white-space:nowrap;font-family:var(--mono)}
+.due-ov{color:var(--danger)}
+.add-row{padding:10px 16px;display:flex;gap:8px;border-top:1px solid var(--border);background:var(--bg)}
+.add-inp{flex:1;border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:13px;font-family:var(--font);background:var(--surface);color:var(--text);outline:none;transition:border-color var(--trans)}
+.add-inp:focus{border-color:var(--accent)}
+.add-inp::placeholder{color:var(--hint)}
+
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:200;animation:fadein .12s ease}
+.modal{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);padding:22px 24px;width:380px;max-width:95vw;animation:slidein .15s ease}
+@keyframes slidein{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+.modal-title{font-size:15px;font-weight:500;margin-bottom:18px;color:var(--text)}
+.form-row{margin-bottom:13px}
+.form-label{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px}
+.form-ctrl{width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;font-family:var(--font);background:var(--surface);color:var(--text);outline:none;transition:border-color var(--trans)}
+.form-ctrl:focus{border-color:var(--accent)}
+.form-ctrl::placeholder{color:var(--hint)}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+
+/* ── Task accordion ── */
+.task-accordion{border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surface);transition:border-color var(--trans)}
+.task-accordion:hover{border-color:var(--border2)}
+.task-accordion.expanded{border-color:var(--accent-m)}
+.task-acc-head{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;cursor:pointer;gap:8px;user-select:none}
+.task-acc-left{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.task-acc-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.task-acc-title{font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.task-acc-title.done-text{text-decoration:line-through;color:var(--hint)}
+.acc-chevron{transition:transform .2s ease;flex-shrink:0;color:var(--hint)}
+.task-accordion.expanded .acc-chevron{transform:rotate(180deg)}
+.task-comments-block{border-top:1px solid var(--border);background:var(--bg);padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.task-meta-row{display:flex;align-items:center;gap:8px}
+.task-select{width:auto;padding:3px 8px;font-size:12px;border-radius:6px;flex-shrink:0}
+.inline-comments{display:flex;flex-direction:column;gap:8px}
+.no-comment-hint{font-size:12px;color:var(--hint);padding:8px 0;font-style:italic}
+.inline-comment{display:flex;gap:8px}
+.ic-avatar{width:26px;height:26px;border-radius:50%;background:var(--accent-l);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--accent);flex-shrink:0}
+.ic-body{flex:1;min-width:0;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px}
+.ic-meta{font-size:11px;color:var(--hint);margin-bottom:3px;display:flex;gap:6px}
+.ic-author{font-weight:500;color:var(--muted)}
+.ic-text{font-size:13px;color:var(--text);line-height:1.5;word-break:break-word}
+.inline-add-row{display:flex;gap:8px;align-items:flex-end;margin-top:2px}
+.inline-comment-inp{flex:1;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;font-family:var(--font);background:var(--surface);color:var(--text);outline:none;resize:none;transition:border-color var(--trans);line-height:1.5;min-height:36px;max-height:120px;overflow-y:auto}
+.inline-comment-inp:focus{border-color:var(--accent)}
+.inline-comment-inp::placeholder{color:var(--hint)}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── Project list ── */
+.proj-list-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background var(--trans)}
+.proj-list-item:last-child{border-bottom:none}
+.proj-list-item:hover{background:var(--bg)}
+.proj-color-sq{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.proj-list-name{font-size:13px;font-weight:500;flex:1;color:var(--text)}
+.proj-list-desc{font-size:12px;color:var(--muted);flex:1.5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.proj-bar-mini{width:80px;height:4px;background:var(--bg);border-radius:2px;overflow:hidden;flex-shrink:0}
+.proj-bar-mini-fill{height:4px;border-radius:2px}
+.proj-pct-mini{font-size:11px;font-family:var(--mono);color:var(--hint);width:28px;text-align:right;flex-shrink:0}
+
+.mic-btn{width:80px;height:80px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;background:var(--accent);color:#fff;flex-shrink:0}
+.mic-btn:hover{transform:scale(1.05)}
+.mic-btn.listening{background:var(--danger);animation:pulse 1s ease-in-out infinite}
+.mic-btn svg{width:32px;height:32px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(162,45,45,.4)}50%{box-shadow:0 0 0 12px rgba(162,45,45,0)}}
+.voice-transcript{min-height:56px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;font-size:14px;color:var(--text);line-height:1.5}
+.intent-btn{padding:8px 16px;border:1px solid var(--border);border-radius:20px;font-size:13px;cursor:pointer;background:var(--surface);color:var(--text);transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.intent-btn:hover{border-color:var(--accent);color:var(--accent)}
+.intent-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round}
+.line-result{padding:14px 16px;border-radius:var(--radius);font-size:13px;line-height:1.6;white-space:pre-line}
+.line-ok{background:var(--success-l);color:var(--success)}
+.line-err{background:var(--danger-l);color:var(--danger)}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark"><svg viewBox="0 0 16 16" width="14" height="14"><polyline points="3,9 6,13 13,4"/></svg></div>
+    <div><span class="logo-title">芸兒小秘書</span><span class="logo-sub">個人芸兒的工作管理</span></div>
+  </div>
+  <div class="nav-section">工作</div>
+  <div class="nav-item" id="nav-todo" onclick="showView('todo')">
+    <svg viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="2"/><polyline points="5,8 7,10 11,6"/></svg>
+    待辦清單<span class="nav-badge" id="badge-todo">0</span>
+  </div>
+  <div class="nav-item active" id="nav-projects" onclick="showView('projects')">
+    <svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h8M2 12h10"/></svg>
+    專案管理
+  </div>
+  <div class="nav-item" id="nav-calendar" onclick="showView('calendar')">
+    <svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M5 2v2M11 2v2M2 7h12"/></svg>
+    日曆提醒
+  </div>
+  <div class="nav-item" id="nav-notes" onclick="showView('notes')">
+    <svg viewBox="0 0 16 16"><rect x="3" y="2" width="10" height="12" rx="1.5"/><path d="M6 6h4M6 9h4M6 12h2"/></svg>
+    會議筆記
+  </div>
+  <div class="nav-section">智慧功能</div>
+  <div class="nav-item" id="nav-voice" onclick="showView('voice')">
+    <svg viewBox="0 0 16 16"><rect x="5" y="1" width="6" height="9" rx="3"/><path d="M3 8c0 2.8 2.2 5 5 5s5-2.2 5-5M8 13v2"/></svg>
+    語音小秘書
+  </div>
+  <div class="nav-item" id="nav-linesettings" onclick="showView('linesettings')">
+    <svg viewBox="0 0 16 16"><path d="M8 2C4.7 2 2 4.2 2 6.9c0 1.7 1 3.2 2.5 4.1L4 14l2.8-1.4A7 7 0 0 0 8 12c3.3 0 6-2.2 6-4.9S11.3 2 8 2z"/></svg>
+    LINE 設定
+  </div>
+  <div class="nav-section">個人（Phase 3）</div>
+  <div class="nav-item" id="nav-personal" onclick="showView('personal')"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5"/><polyline points="8,5 8,8 10,9"/></svg>個人日曆</div>
+  <div class="nav-item" id="nav-family" onclick="showView('family')"><svg viewBox="0 0 16 16"><path d="M8 2L9.5 6H14L10.5 8.5L12 13L8 10.5L4 13L5.5 8.5L2 6H6.5Z"/></svg>家庭代辦</div>
+  <div class="nav-item" id="nav-health" onclick="showView('health')"><svg viewBox="0 0 16 16"><path d="M2 12C2 9.8 3.8 8 6 8C8.2 8 10 9.8 10 12"/><circle cx="6" cy="4.5" r="2.5"/><path d="M11 7C12.7 7 14 8.3 14 10"/><circle cx="11" cy="4" r="2"/></svg>健康追蹤</div>
+  <div class="sidebar-footer">
+    <button class="theme-btn" onclick="toggleTheme()" title="切換深色模式">
+      <svg id="theme-icon" viewBox="0 0 16 16"><path d="M8 2v1M8 13v1M2 8h1M13 8h1M4 4l.7.7M11.3 11.3l.7.7M4 12l.7-.7M11.3 4.7l.7-.7"/><circle cx="8" cy="8" r="3"/></svg>
+    </button>
+    <span style="font-size:11px;color:var(--hint);flex:1">v3.0 — Phase 3</span>
+    <span id="save-status" style="font-size:11px;color:var(--success)">已儲存</span>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-info">
+      <div class="topbar-title" id="view-title">專案管理</div>
+      <div class="topbar-date" id="view-date"></div>
+    </div>
+    <div class="topbar-actions" id="topbar-actions"></div>
+  </div>
+  <div class="content" id="content"></div>
+</div>
+</div>
+
+<div id="modal-mount"></div>
+<div id="detail-mount"></div>
+
+<script>
+/* ═══════════════════ DATA ═══════════════════ */
+const COLORS = ['#534AB7','#1D9E75','#EF9F27','#D85A30','#185FA5','#D4537E','#0F6E56','#BA7517'];
+
+const DEFAULT_TODOS = [
+  {id:1,text:'完成 Q2 季報初稿',done:false,priority:'high',tag:'工作報告',tagCls:'tg-p',due:'今天',overdue:false,project:'Q2 季報',created:Date.now()},
+  {id:2,text:'與 Alex 確認產品路線圖',done:false,priority:'high',tag:'產品',tagCls:'tg-b',due:'今天',overdue:false,project:'產品規劃',created:Date.now()},
+  {id:3,text:'回覆客戶提案 email',done:false,priority:'high',tag:'客戶',tagCls:'tg-a',due:'昨天',overdue:true,project:'',created:Date.now()},
+  {id:4,text:'更新 API 文件到 v2.3',done:false,priority:'med',tag:'技術',tagCls:'tg-t',due:'明天',overdue:false,project:'後端系統',created:Date.now()},
+  {id:5,text:'準備週五 standup 議程',done:false,priority:'med',tag:'會議',tagCls:'tg-p',due:'週五',overdue:false,project:'',created:Date.now()},
+  {id:6,text:'申請差旅費用報銷',done:true,priority:'low',tag:'行政',tagCls:'tg-a',due:'完成',overdue:false,project:'',created:Date.now()},
+];
+
+const DEFAULT_PROJECTS = [
+  {id:1,name:'Q2 季報',desc:'第二季財務與業績分析',progress:65,color:'#534AB7',
+   startDate:'2024-06-01',endDate:'2024-07-31',status:'on',
+   tasks:[
+     {id:101,title:'收集各部門數據',status:'done',priority:'high',due:'6/10',assignee:'王小明',comments:[{id:1,author:'王小明',avatar:'王',text:'數據已從 ERP 匯出，正在整理中',time:'6/08 14:30'},{id:2,author:'李大華',avatar:'李',text:'請確認行銷部門的數字是否含退款',time:'6/09 09:15'}]},
+     {id:102,title:'製作圖表與分析',status:'in',priority:'high',due:'7/05',assignee:'李大華',comments:[{id:3,author:'李大華',avatar:'李',text:'圖表初版完成，等 PM 確認格式',time:'7/01 16:00'}]},
+     {id:103,title:'撰寫執行摘要',status:'in',priority:'med',due:'7/20',assignee:'你',comments:[]},
+     {id:104,title:'排版與最終校稿',status:'todo',priority:'med',due:'7/28',assignee:'你',comments:[]},
+     {id:105,title:'簡報給董事會',status:'todo',priority:'high',due:'7/31',assignee:'王小明',comments:[]},
+   ]},
+  {id:2,name:'後端系統重構',desc:'API v2 架構升級',progress:30,color:'#1D9E75',
+   startDate:'2024-06-15',endDate:'2024-09-30',status:'at',
+   tasks:[
+     {id:201,title:'分析現有架構瓶頸',status:'done',priority:'high',due:'6/20',assignee:'陳工程師',comments:[{id:4,author:'陳工程師',avatar:'陳',text:'發現 N+1 查詢問題，已記錄在 JIRA',time:'6/18 11:00'}]},
+     {id:202,title:'設計新 API schema',status:'done',priority:'high',due:'7/01',assignee:'陳工程師',comments:[]},
+     {id:203,title:'建立 GraphQL layer',status:'in',priority:'high',due:'7/15',assignee:'陳工程師',comments:[{id:5,author:'PM',avatar:'P',text:'進度落後，需要增援嗎？',time:'7/10 10:30'},{id:6,author:'陳工程師',avatar:'陳',text:'需要一位後端工程師協助，預計延後一週',time:'7/10 11:45'}]},
+     {id:204,title:'資料庫 migration',status:'todo',priority:'high',due:'8/01',assignee:'你',comments:[]},
+     {id:205,title:'壓力測試與優化',status:'todo',priority:'med',due:'9/01',assignee:'陳工程師',comments:[]},
+   ]},
+  {id:3,name:'客戶提案 A',desc:'Acme Corp 服務提案',progress:80,color:'#EF9F27',
+   startDate:'2024-07-01',endDate:'2024-07-31',status:'on',
+   tasks:[
+     {id:301,title:'需求訪談',status:'done',priority:'high',due:'7/03',assignee:'你',comments:[]},
+     {id:302,title:'撰寫提案文件',status:'done',priority:'high',due:'7/10',assignee:'你',comments:[]},
+     {id:303,title:'製作簡報',status:'done',priority:'med',due:'7/15',assignee:'設計師',comments:[]},
+     {id:304,title:'提案簡報',status:'in',priority:'high',due:'7/20',assignee:'你',comments:[{id:7,author:'你',avatar:'你',text:'客戶對方案 B 感興趣，需要補充 ROI 分析',time:'7/18 15:00'}]},
+     {id:305,title:'合約簽署',status:'todo',priority:'high',due:'7/31',assignee:'你',comments:[]},
+   ]},
+  {id:4,name:'產品路線圖',desc:'2024 H2 產品規劃',progress:20,color:'#D85A30',
+   startDate:'2024-07-10',endDate:'2024-08-15',status:'on',
+   tasks:[
+     {id:401,title:'用戶訪談（10 人）',status:'in',priority:'high',due:'7/20',assignee:'PM',comments:[]},
+     {id:402,title:'競品分析',status:'todo',priority:'med',due:'7/25',assignee:'PM',comments:[]},
+     {id:403,title:'功能優先級排序',status:'todo',priority:'high',due:'8/01',assignee:'你',comments:[]},
+     {id:404,title:'路線圖文件撰寫',status:'todo',priority:'med',due:'8/10',assignee:'你',comments:[]},
+   ]},
+  {id:5,name:'行銷活動 Q3',desc:'夏季推廣行動',progress:50,color:'#185FA5',
+   startDate:'2024-07-01',endDate:'2024-09-30',status:'on',
+   tasks:[
+     {id:501,title:'活動企劃書',status:'done',priority:'high',due:'7/05',assignee:'行銷',comments:[]},
+     {id:502,title:'社群內容製作',status:'in',priority:'med',due:'7/31',assignee:'行銷',comments:[]},
+     {id:503,title:'投放廣告設定',status:'todo',priority:'med',due:'8/01',assignee:'行銷',comments:[]},
+   ]},
+  {id:6,name:'HR 新制度',desc:'員工績效考核系統',progress:90,color:'#0F6E56',
+   startDate:'2024-05-01',endDate:'2024-07-15',status:'on',
+   tasks:[
+     {id:601,title:'制度草案',status:'done',priority:'high',due:'5/15',assignee:'HR',comments:[]},
+     {id:602,title:'主管宣導',status:'done',priority:'med',due:'6/01',assignee:'HR',comments:[]},
+     {id:603,title:'系統建置',status:'done',priority:'high',due:'7/01',assignee:'IT',comments:[]},
+     {id:604,title:'全員上線',status:'in',priority:'high',due:'7/15',assignee:'HR',comments:[]},
+   ]},
+];
+
+const DEFAULT_NOTES = [
+  {id:1,title:'週一 Standup 記錄',date:'2024-07-01',preview:'討論 Q2 目標達成率，後端系統延期至 7/15',tags:['會議','standup']},
+  {id:2,title:'產品路線圖討論',date:'2024-07-03',preview:'確認 H2 功能優先級：通知系統 > 搜尋優化',tags:['產品','規劃']},
+];
+
+/* ═══════════════════ API 資料層 ═══════════════════ */
+let _saveTimer = null;
+let _saveStatus = 'saved'; // 'saved' | 'saving' | 'error'
+
+async function loadFromServer() {
+  try {
+    const res = await fetch('/api/data');
+    if (!res.ok) throw new Error('server error');
+    return await res.json();
+  } catch(e) {
+    console.warn('無法連線伺服器，使用本機暫存:', e.message);
+    return null;
+  }
+}
+
+function save() {
+  // 防抖：500ms 內多次操作只送一次
+  clearTimeout(_saveTimer);
+  setSaveStatus('saving');
+  _saveTimer = setTimeout(async () => {
+    try {
+      const res = await fetch('/api/data', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ todos, projects, notes, settings:{ dark } })
+      });
+      if(res.ok){ setSaveStatus('saved'); } else { setSaveStatus('error'); }
+    } catch(e) {
+      setSaveStatus('error');
+    }
+  }, 500);
+}
+
+function setSaveStatus(s) {
+  _saveStatus = s;
+  const el = document.getElementById('save-status');
+  if (!el) return;
+  const map = {
+    saving: { text:'儲存中…', color:'var(--warn)' },
+    saved:  { text:'已儲存', color:'var(--success)' },
+    error:  { text:'儲存失敗', color:'var(--danger)' },
+  };
+  const m = map[s] || map.saved;
+  el.textContent = m.text;
+  el.style.color = m.color;
+}
+
+let todos    = DEFAULT_TODOS;
+let projects = DEFAULT_PROJECTS;
+let notes    = DEFAULT_NOTES;
+let dark     = false;
+let view     = 'projects';
+let projView = 'list';   // 'list' | 'kanban' | 'gantt'
+let todoFilter = 'all';
+let selectedProjId = null;
+let dragSrc = null;
+
+if(dark) document.documentElement.setAttribute('data-theme','dark');
+
+/* ─── helpers ─── */
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function $ (id){return document.getElementById(id)}
+function updateBadge(){const b=$('badge-todo');const n=todos.filter(t=>!t.done).length;if(b){b.textContent=n;b.style.display=n?'':'none'}}
+function statusLabel(s){return{todo:'待處理',in:'進行中',done:'已完成',block:'阻塞中'}[s]||s}
+function statusCls(s){return{todo:'tg-p',in:'tg-b',done:'tg-t',block:'tg-d'}[s]||'tg-p'}
+function projStatus(p){const s=p.status;return{on:{cls:'st-on',lbl:'進行中'},at:{cls:'st-at',lbl:'注意'},de:{cls:'st-de',lbl:'延遲'},dn:{cls:'st-dn',lbl:'完成'}}[s]||{cls:'st-on',lbl:'進行中'}}
+function calcProgress(proj){const t=proj.tasks||[];if(!t.length)return 0;return Math.round(t.filter(x=>x.status==='done').length/t.length*100)}
+function priColor(p){return{high:'var(--danger)',med:'var(--warn)',low:'var(--success)'}[p]||'var(--hint)'}
+
+/* ─── Date ─── */
+$('view-date').textContent=new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
+
+/* ─── Theme ─── */
+function toggleTheme(){dark=!dark;save();dark?document.documentElement.setAttribute('data-theme','dark'):document.documentElement.removeAttribute('data-theme');updateThemeIcon()}
+function updateThemeIcon(){const ic=$('theme-icon');if(!ic)return;ic.innerHTML=dark?'<path d="M13 8A5 5 0 1 1 8 3a3.5 3.5 0 0 0 5 5z"/>':'<path d="M8 2v1M8 13v1M2 8h1M13 8h1M4 4l.7.7M11.3 11.3l.7.7M4 12l.7-.7M11.3 4.7l.7-.7"/><circle cx="8" cy="8" r="3"/>'}
+updateThemeIcon();
+
+/* ─── Nav ─── */
+function showView(v){
+  view=v;
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const el=$('nav-'+v); if(el) el.classList.add('active');
+  const titles={todo:'工作待辦清單',projects:'專案管理',calendar:'日曆提醒',notes:'會議 & 課程筆記',voice:'語音小秘書',linesettings:'LINE 設定與推播',personal:'個人日曆',family:'家庭代辦',health:'健康追蹤'};
+  $('view-title').textContent=titles[v]||v;
+  render();
+}
+
+/* ═══════════════════ RENDER ═══════════════════ */
+function render(){
+  updateBadge();
+  const c=$('content'), ta=$('topbar-actions');
+  if(view==='todo') renderTodo(c,ta);
+  else if(view==='projects') renderProjects(c,ta);
+  else if(view==='calendar') renderCalendar(c,ta).catch(()=>{gcalAuth={authed:false};renderCalendarContent();});
+  else if(view==='notes') renderNotes(c,ta);
+  else if(view==='voice') renderVoice(c,ta);
+  else if(view==='linesettings') renderLineSettings(c,ta);
+  else if(view==='personal') renderPersonal(c,ta);
+  else if(view==='family') renderFamily(c,ta);
+  else if(view==='health') renderHealth(c,ta);
+}
+
+/* ═══════════════════ PROJECTS ═══════════════════ */
+function renderProjects(c,ta){
+  // Sync progress from tasks
+  projects.forEach(p=>{p.progress=calcProgress(p)});
+
+  const total=projects.length;
+  const onTrack=projects.filter(p=>p.status==='on').length;
+  const atRisk=projects.filter(p=>p.status==='at'||p.status==='de').length;
+  const avgProg=projects.length?Math.round(projects.reduce((a,p)=>a+p.progress,0)/projects.length):0;
+
+  ta.innerHTML=`
+  <div class="view-toggle">
+    <button class="vt-btn ${projView==='list'?'active':''}" onclick="setProjView('list')">
+      <svg viewBox="0 0 13 13"><path d="M1 3h11M1 6.5h11M1 10h11"/></svg>清單
+    </button>
+    <button class="vt-btn ${projView==='kanban'?'active':''}" onclick="setProjView('kanban')">
+      <svg viewBox="0 0 13 13"><rect x="1" y="1" width="3" height="11" rx="1"/><rect x="5" y="1" width="3" height="8" rx="1"/><rect x="9" y="1" width="3" height="9" rx="1"/></svg>看板
+    </button>
+    <button class="vt-btn ${projView==='gantt'?'active':''}" onclick="setProjView('gantt')">
+      <svg viewBox="0 0 13 13"><path d="M1 3h6M1 6.5h9M1 10h5"/></svg>甘特
+    </button>
+  </div>
+  <button class="btn btn-primary" onclick="openAddProject()">
+    <svg viewBox="0 0 12 12"><path d="M6 1v10M1 6h10"/></svg>新增專案
+  </button>`;
+
+  if(projView==='list') renderProjList(c,total,onTrack,atRisk,avgProg);
+  else if(projView==='kanban') renderKanban(c);
+  else if(projView==='gantt') renderGantt(c,total,onTrack,atRisk,avgProg);
+}
+
+function setProjView(v){projView=v;render()}
+
+/* ── Project List ── */
+function renderProjList(c,total,onTrack,atRisk,avgProg){
+  c.innerHTML=`
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-label">專案總數</div><div class="stat-val">${total}</div><div class="stat-sub">個進行中</div></div>
+    <div class="stat-card"><div class="stat-label">正常進行</div><div class="stat-val" style="color:var(--success)">${onTrack}</div><div class="stat-sub" style="color:var(--success)">on track</div></div>
+    <div class="stat-card"><div class="stat-label">需要注意</div><div class="stat-val" style="color:var(--warn)">${atRisk}</div><div class="stat-sub" style="color:var(--warn)">at risk</div></div>
+    <div class="stat-card"><div class="stat-label">平均進度</div><div class="stat-val">${avgProg}<span style="font-size:14px;color:var(--muted)">%</span></div><div class="stat-sub">所有專案</div></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><span class="card-title">所有專案</span><span style="font-size:11px;color:var(--hint)">點擊查看詳情</span></div>
+    <div>
+      ${projects.map(p=>{
+        const s=projStatus(p);
+        return`<div class="proj-list-item" onclick="openProjectDetail(${p.id})" style="position:relative">
+          <div class="proj-color-sq" style="background:${p.color}"></div>
+          <span class="proj-list-name" style="${p.progress===100?'text-decoration:line-through;color:var(--hint)':''}">${esc(p.name)}</span>
+          <span class="proj-list-desc">${esc(p.desc)}</span>
+          <span class="tag ${s.cls}" style="font-size:11px">${s.lbl}</span>
+          <div class="proj-bar-mini"><div class="proj-bar-mini-fill" style="width:${p.progress}%;background:${p.color}"></div></div>
+          <span class="proj-pct-mini">${p.progress}%</span>
+          <button class="btn btn-ghost btn-sm" style="padding:3px 6px;color:var(--hint);flex-shrink:0"
+            onclick="event.stopPropagation();confirmDeleteProject(${p.id})" title="刪除專案">
+            <svg viewBox="0 0 12 12" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 3h8M5 3V2h2v1M4 3v6M8 3v6M3 3l.5 7h5L9 3"/></svg>
+          </button>
+        </div>`;}).join('')}
+    </div>
+  </div>`;
+}
+
+/* ── Kanban ── */
+function renderKanban(c){
+  const allTasks=projects.flatMap(p=>(p.tasks||[]).map(t=>({...t,projectName:p.name,projectColor:p.color,projectId:p.id})));
+  const cols=[
+    {id:'todo', label:'待處理', color:'#888780'},
+    {id:'in',   label:'進行中', color:'#534AB7'},
+    {id:'done', label:'已完成', color:'#0F6E56'},
+    {id:'block',label:'阻塞中', color:'#A32D2D'},
+  ];
+
+  c.innerHTML=`<div class="card" style="overflow:hidden">
+  <div class="card-head">
+    <span class="card-title">所有專案看板</span>
+    <span style="font-size:11px;color:var(--hint)">${allTasks.length} 個任務</span>
+  </div>
+  <div class="kanban-board" id="kanban-board">
+    ${cols.map(col=>{
+      const cards=allTasks.filter(t=>t.status===col.id);
+      return`<div class="kanban-col" data-col="${col.id}" ondragover="kDragOver(event)" ondrop="kDrop(event,'${col.id}')">
+        <div class="kanban-col-head">
+          <span class="kanban-col-title"><span class="col-dot" style="background:${col.color}"></span>${col.label}</span>
+          <span class="kanban-count">${cards.length}</span>
+        </div>
+        ${cards.map(t=>`
+        <div class="kcard" draggable="true"
+          ondragstart="kDragStart(event,${t.projectId},${t.id})"
+          ondragend="kDragEnd(event)"
+          onclick="openTaskDetail(${t.projectId},${t.id})">
+          <div class="priority-bar" style="background:${priColor(t.priority)}"></div>
+          <div class="kcard-title">${esc(t.title)}</div>
+          <div class="kcard-meta">
+            <span class="tag tg-p" style="font-size:10px;padding:1px 6px">${esc(t.projectName)}</span>
+          </div>
+          <div class="kcard-foot">
+            <span class="kcard-due">${esc(t.due||'')}</span>
+            <span class="kcard-comments">
+              <svg viewBox="0 0 12 12"><path d="M1 1h10v7H7l-2 2-1-2H1z"/></svg>
+              ${(t.comments||[]).length}
+            </span>
+          </div>
+        </div>`).join('')}
+        <div class="kanban-add" onclick="openAddTask(${col.id==='todo'?'todo':'in'})">
+          <svg viewBox="0 0 12 12"><path d="M6 1v10M1 6h10"/></svg>新增
+        </div>
+      </div>`;}).join('')}
+  </div>
+  </div>`;
+}
+
+/* ── Drag & Drop ── */
+function kDragStart(e, projId, taskId){
+  dragSrc={projId,taskId};
+  e.currentTarget.classList.add('drag-ghost');
+  e.dataTransfer.effectAllowed='move';
+}
+function kDragEnd(e){
+  e.currentTarget.classList.remove('drag-ghost');
+  document.querySelectorAll('.kanban-col').forEach(c=>c.classList.remove('drag-over'));
+}
+function kDragOver(e){
+  e.preventDefault(); e.dataTransfer.dropEffect='move';
+  e.currentTarget.classList.add('drag-over');
+}
+function kDrop(e, newStatus){
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if(!dragSrc) return;
+  const proj=projects.find(p=>p.id===dragSrc.projId);
+  if(!proj) return;
+  const task=(proj.tasks||[]).find(t=>t.id===dragSrc.taskId);
+  if(task){ task.status=newStatus; save(); render(); }
+  dragSrc=null;
+}
+
+/* ── Gantt ── */
+function renderGantt(c,total,onTrack,atRisk,avgProg){
+  c.innerHTML=`
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-label">專案總數</div><div class="stat-val">${total}</div><div class="stat-sub">個進行中</div></div>
+    <div class="stat-card"><div class="stat-label">正常進行</div><div class="stat-val" style="color:var(--success)">${onTrack}</div><div class="stat-sub" style="color:var(--success)">on track</div></div>
+    <div class="stat-card"><div class="stat-label">需要注意</div><div class="stat-val" style="color:var(--warn)">${atRisk}</div><div class="stat-sub" style="color:var(--warn)">at risk</div></div>
+    <div class="stat-card"><div class="stat-label">平均進度</div><div class="stat-val">${avgProg}<span style="font-size:14px;color:var(--muted)">%</span></div><div class="stat-sub">所有專案</div></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><span class="card-title">甘特圖 — 專案時程</span><span style="font-size:11px;color:var(--hint)">點擊查看詳情</span></div>
+    <div class="gantt-wrap">
+    <table class="gantt-table">
+      <thead><tr>
+        <th style="width:160px">專案</th>
+        <th style="width:90px">開始</th>
+        <th style="width:90px">截止</th>
+        <th>進度</th>
+        <th style="width:44px;text-align:right">%</th>
+        <th style="width:72px">狀態</th>
+      </tr></thead>
+      <tbody>
+        ${projects.map(p=>{
+          const s=projStatus(p);
+          return`<tr style="cursor:pointer" onclick="openProjectDetail(${p.id})">
+            <td><div style="display:flex;align-items:center;gap:7px">
+              <div style="width:8px;height:8px;border-radius:2px;background:${p.color};flex-shrink:0"></div>
+              <span class="gantt-name-cell">${esc(p.name)}</span>
+            </div></td>
+            <td style="font-size:12px;color:var(--muted);font-family:var(--mono)">${p.startDate||'—'}</td>
+            <td style="font-size:12px;color:var(--muted);font-family:var(--mono)">${p.endDate||'—'}</td>
+            <td class="gantt-bar-cell">
+              <div class="gantt-bar-wrap">
+                <div class="gantt-bar-fill" style="width:${p.progress}%;background:${p.color}">
+                  ${p.progress>18?`<span class="gantt-bar-label">${p.progress}%</span>`:''}
+                </div>
+              </div>
+            </td>
+            <td class="gantt-pct">${p.progress}</td>
+            <td><span class="gantt-status ${s.cls}">${s.lbl}</span></td>
+          </tr>`;}).join('')}
+      </tbody>
+    </table>
+    </div>
+  </div>`;
+}
+
+/* ─── Project Detail Panel ─── */
+let expandedTaskIds = new Set();
+
+function renderCommentBlock(projId, t){
+  const coms = t.comments||[];
+  return `
+  <div class="task-comments-block" id="tcb-${t.id}">
+    <div class="task-meta-row">
+      <select class="form-ctrl task-select" onchange="updateTaskStatus(${projId},${t.id},this.value)" onclick="event.stopPropagation()">
+        ${['todo','in','done','block'].map(s=>`<option value="${s}" ${t.status===s?'selected':''}>${statusLabel(s)}</option>`).join('')}
+      </select>
+      <select class="form-ctrl task-select" onchange="updateTaskPriority(${projId},${t.id},this.value)" onclick="event.stopPropagation()">
+        <option value="high" ${t.priority==='high'?'selected':''}>高優先</option>
+        <option value="med"  ${t.priority==='med' ?'selected':''}>中優先</option>
+        <option value="low"  ${t.priority==='low' ?'selected':''}>低優先</option>
+      </select>
+      <span style="font-size:11px;color:var(--hint);margin-left:auto;font-family:var(--mono)">${esc(t.assignee||'')}${t.due?' · '+esc(t.due):''}</span>
+    </div>
+    <div class="inline-comments" id="icl-${t.id}">
+      ${coms.length===0
+        ? `<div class="no-comment-hint">尚無討論紀錄，留下第一則備註</div>`
+        : coms.map(c=>`
+          <div class="inline-comment">
+            <div class="ic-avatar">${esc((c.avatar||c.author||'?')[0])}</div>
+            <div class="ic-body">
+              <div class="ic-meta"><span class="ic-author">${esc(c.author)}</span><span>${esc(c.time)}</span></div>
+              <div class="ic-text">${esc(c.text)}</div>
+            </div>
+          </div>`).join('')}
+    </div>
+    <div class="inline-add-row" onclick="event.stopPropagation()">
+      <div class="ic-avatar" style="margin-top:2px">你</div>
+      <textarea class="inline-comment-inp" id="icinp-${t.id}" rows="1"
+        placeholder="新增備註或討論..."
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitInlineComment(${projId},${t.id})}"
+        oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+      <button class="btn btn-primary btn-sm" style="align-self:flex-end;padding:4px 10px"
+        onclick="submitInlineComment(${projId},${t.id})">送出</button>
+    </div>
+  </div>`;
+}
+
+function renderProjDetailTasks(projId){
+  const p = projects.find(x=>x.id===projId);
+  if(!p) return;
+  const container = $('proj-tasks-container');
+  if(!container) return;
+  container.innerHTML = p.tasks.map(t=>{
+    const expanded = expandedTaskIds.has(t.id);
+    const cCount = (t.comments||[]).length;
+    return `
+    <div class="task-accordion ${expanded?'expanded':''}" id="tacc-${t.id}">
+      <div class="task-acc-head" onclick="toggleTaskExpand(${projId},${t.id})">
+        <div class="task-acc-left">
+          <svg class="acc-chevron" viewBox="0 0 10 10" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 3.5l3 3 3-3"/></svg>
+          <div style="width:7px;height:7px;border-radius:50%;background:${priColor(t.priority)};flex-shrink:0"></div>
+          <span class="task-acc-title ${t.status==='done'?'done-text':''}">${esc(t.title)}</span>
+        </div>
+        <div class="task-acc-right">
+          <span class="tag ${statusCls(t.status)}" style="font-size:10px;padding:1px 6px">${statusLabel(t.status)}</span>
+          <span style="font-size:11px;color:var(--hint);display:flex;align-items:center;gap:3px">
+            <svg viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1 1h10v7H7l-2 2-1-2H1z"/></svg>
+            ${cCount}
+          </span>
+          <button class="btn btn-ghost" style="padding:2px 5px;color:var(--hint);border:none"
+            onclick="event.stopPropagation();confirmDeleteTask(${projId},${t.id})" title="刪除任務">
+            <svg viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 3h8M5 3V2h2v1M4 3v6M8 3v6M3 3l.5 7h5L9 3"/></svg>
+          </button>
+        </div>
+      </div>
+      ${expanded ? renderCommentBlock(projId, t) : ''}
+    </div>`;
+  }).join('');
+}
+
+function toggleTaskExpand(projId, taskId){
+  if(expandedTaskIds.has(taskId)) expandedTaskIds.delete(taskId);
+  else expandedTaskIds.add(taskId);
+  renderProjDetailTasks(projId);
+}
+
+function submitInlineComment(projId, taskId){
+  const inp = $('icinp-'+taskId);
+  if(!inp) return;
+  const txt = inp.value.trim();
+  if(!txt) return;
+  const p = projects.find(x=>x.id===projId);
+  if(!p) return;
+  const t = (p.tasks||[]).find(x=>x.id===taskId);
+  if(!t) return;
+  t.comments = t.comments||[];
+  const now = new Date();
+  const timeStr = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  t.comments.push({id:Date.now(), author:'你', avatar:'你', text:txt, time:timeStr});
+  save();
+  // re-render just the comment list + input
+  const icl = $('icl-'+taskId);
+  if(icl) icl.innerHTML = t.comments.map(c=>`
+    <div class="inline-comment">
+      <div class="ic-avatar">${esc((c.avatar||c.author||'?')[0])}</div>
+      <div class="ic-body">
+        <div class="ic-meta"><span class="ic-author">${esc(c.author)}</span><span>${esc(c.time)}</span></div>
+        <div class="ic-text">${esc(c.text)}</div>
+      </div>
+    </div>`).join('');
+  inp.value=''; inp.style.height='auto';
+  // update comment count badge in header
+  const acc = $('tacc-'+taskId);
+  if(acc){
+    const badge = acc.querySelector('.task-acc-right span:last-child');
+    if(badge) badge.innerHTML = `<svg viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1 1h10v7H7l-2 2-1-2H1z"/></svg> ${t.comments.length}`;
+  }
+  inp.focus();
+}
+
+function openProjectDetail(projId){
+  selectedProjId=projId;
+  expandedTaskIds = new Set();
+  const p=projects.find(x=>x.id===projId);
+  if(!p) return;
+  const s=projStatus(p);
+  const allDone=p.tasks.filter(t=>t.status==='done').length;
+  const allComments=p.tasks.reduce((a,t)=>a+(t.comments||[]).length,0);
+
+  const m=$('detail-mount');
+  m.innerHTML=`<div class="detail-overlay" onclick="if(event.target===this)closeDetail()">
+  <div class="detail-panel" style="width:520px">
+    <div class="detail-head">
+      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+        <div style="width:10px;height:10px;border-radius:3px;background:${p.color};flex-shrink:0;cursor:pointer" onclick="openEditProjectColor(${p.id})" title="點擊更換顏色"></div>
+        <div style="min-width:0;flex:1">
+          <div id="proj-name-display" style="display:flex;align-items:center;gap:6px">
+            <div class="detail-title" id="proj-name-text" style="cursor:pointer;border-bottom:1px dashed transparent;transition:border-color .15s"
+              onmouseover="this.style.borderBottomColor='var(--border2)'"
+              onmouseout="this.style.borderBottomColor='transparent'"
+              onclick="startEditProjName(${p.id})"
+              title="點擊編輯名稱">${esc(p.name)}</div>
+            <svg onclick="startEditProjName(${p.id})" viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="var(--hint)" stroke-width="1.8" stroke-linecap="round" style="cursor:pointer;flex-shrink:0"><path d="M7 2l3 3-6 6H1V8z"/></svg>
+          </div>
+          <div id="proj-desc-display" style="display:flex;align-items:center;gap:4px;margin-top:3px">
+            <div style="font-size:12px;color:var(--muted);cursor:pointer;border-bottom:1px dashed transparent;transition:border-color .15s"
+              onmouseover="this.style.borderBottomColor='var(--border2)'"
+              onmouseout="this.style.borderBottomColor='transparent'"
+              onclick="startEditProjDesc(${p.id})"
+              title="點擊編輯說明">${esc(p.desc)||'點擊新增說明…'}</div>
+          </div>
+        </div>
+      </div>
+      <button class="close-btn" onclick="closeDetail()"><svg viewBox="0 0 14 14"><path d="M2 2l10 10M12 2L2 12"/></svg></button>
+    </div>
+    <div class="detail-body">
+
+      <div class="detail-section">
+        <div class="detail-meta-grid">
+          <div class="detail-meta-item">
+            <div class="detail-meta-label">狀態</div>
+            <select class="form-ctrl" style="padding:4px 8px;font-size:12px" onchange="updateProjStatus(${p.id},this.value)">
+              <option value="on" ${p.status==='on'?'selected':''}>進行中</option>
+              <option value="at" ${p.status==='at'?'selected':''}>需要注意</option>
+              <option value="de" ${p.status==='de'?'selected':''}>已延遲</option>
+              <option value="dn" ${p.status==='dn'?'selected':''}>已完成</option>
+            </select>
+          </div>
+          <div class="detail-meta-item"><div class="detail-meta-label">任務完成</div><div class="detail-meta-val" style="font-family:var(--mono)">${allDone} / ${p.tasks.length}</div></div>
+          <div class="detail-meta-item">
+            <div class="detail-meta-label">開始日</div>
+            <input type="date" class="form-ctrl" style="padding:4px 8px;font-size:12px" value="${p.startDate||''}" onchange="updateProjDate(${p.id},'startDate',this.value)">
+          </div>
+          <div class="detail-meta-item">
+            <div class="detail-meta-label">截止日</div>
+            <input type="date" class="form-ctrl" style="padding:4px 8px;font-size:12px" value="${p.endDate||''}" onchange="updateProjDate(${p.id},'endDate',this.value)">
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">整體進度</div>
+        <div class="progress-edit">
+          <input type="range" min="0" max="100" value="${p.progress}" id="prog-slider" style="flex:1;accent-color:${p.color}">
+          <span id="prog-label" style="font-size:13px;font-family:var(--mono);color:var(--text);width:36px;text-align:right">${p.progress}%</span>
+        </div>
+        <div style="height:5px;background:var(--bg);border-radius:3px;overflow:hidden;margin-top:6px">
+          <div id="prog-bar-visual" style="height:5px;border-radius:3px;background:${p.color};width:${p.progress}%;transition:width .3s"></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:6px">
+          <button class="btn btn-sm btn-primary" onclick="saveProgress(${p.id})">儲存進度</button>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div class="detail-section-title" style="margin:0">工作細項 & 討論紀錄（${p.tasks.length} 項 · ${allComments} 則）</div>
+          <button class="btn btn-sm" onclick="openAddTaskToProject(${p.id})">
+            <svg viewBox="0 0 12 12" width="11" height="11"><path d="M6 1v10M1 6h10"/></svg>新增任務
+          </button>
+        </div>
+        <div id="proj-tasks-container" style="display:flex;flex-direction:column;gap:4px"></div>
+        ${p.tasks.length===0?`<div style="padding:20px;text-align:center;font-size:13px;color:var(--hint);border:1px dashed var(--border);border-radius:8px">尚無任務，點擊「新增任務」開始</div>`:''}
+      </div>
+
+    </div>
+  </div>
+  </div>`;
+
+  const sl=$('prog-slider');
+  if(sl) sl.addEventListener('input',function(){
+    $('prog-label').textContent=this.value+'%';
+    const bar=$('prog-bar-visual');
+    if(bar) bar.style.width=this.value+'%';
+  });
+
+  renderProjDetailTasks(projId);
+}
+
+function updateProgLabel(v){
+  $('prog-label').textContent=v+'%';
+  const bar=$('prog-bar-visual');if(bar) bar.style.width=v+'%';
+}
+
+function saveProgress(projId){
+  const sl=$('prog-slider');
+  if(!sl) return;
+  const p=projects.find(x=>x.id===projId);
+  if(p){ p.progress=parseInt(sl.value); save(); }
+  const lbl=$('prog-label');if(lbl){lbl.style.color='var(--success)';setTimeout(()=>{if(lbl)lbl.style.color='var(--text)'},1200)}
+}
+
+
+/* ── 專案內聯編輯 ── */
+function startEditProjName(projId){
+  const p=projects.find(x=>x.id===projId);
+  if(!p) return;
+  const display=$('proj-name-display');
+  if(!display) return;
+  display.innerHTML=`<input id="edit-proj-name" class="form-ctrl" value="${esc(p.name)}"
+    style="font-size:15px;font-weight:500;padding:4px 8px;flex:1"
+    onkeydown="if(event.key==='Enter')saveProjName(${projId});if(event.key==='Escape')openProjectDetail(${projId})"
+    onblur="saveProjName(${projId})">`;
+  const inp=$('edit-proj-name');
+  if(inp){inp.focus();inp.select();}
+}
+
+function saveProjName(projId){
+  const inp=$('edit-proj-name');
+  if(!inp) return;
+  const val=inp.value.trim();
+  if(!val) return;
+  const p=projects.find(x=>x.id===projId);
+  if(p){ p.name=val; save(); }
+  const display=$('proj-name-display');
+  if(display){
+    display.innerHTML=`<div class="detail-title" id="proj-name-text" style="cursor:pointer;border-bottom:1px dashed transparent;transition:border-color .15s"
+      onmouseover="this.style.borderBottomColor='var(--border2)'"
+      onmouseout="this.style.borderBottomColor='transparent'"
+      onclick="startEditProjName(${projId})" title="點擊編輯名稱">${esc(val)}</div>
+      <svg onclick="startEditProjName(${projId})" viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="var(--hint)" stroke-width="1.8" stroke-linecap="round" style="cursor:pointer;flex-shrink:0"><path d="M7 2l3 3-6 6H1V8z"/></svg>`;
+    render();
+  }
+}
+
+function startEditProjDesc(projId){
+  const p=projects.find(x=>x.id===projId);
+  if(!p) return;
+  const display=$('proj-desc-display');
+  if(!display) return;
+  display.innerHTML=`<input id="edit-proj-desc" class="form-ctrl" value="${esc(p.desc||'')}"
+    placeholder="輸入專案說明..."
+    style="font-size:12px;padding:4px 8px;flex:1"
+    onkeydown="if(event.key==='Enter')saveProjDesc(${projId});if(event.key==='Escape')openProjectDetail(${projId})"
+    onblur="saveProjDesc(${projId})">`;
+  const inp=$('edit-proj-desc');
+  if(inp){inp.focus();}
+}
+
+function saveProjDesc(projId){
+  const inp=$('edit-proj-desc');
+  if(!inp) return;
+  const val=inp.value.trim();
+  const p=projects.find(x=>x.id===projId);
+  if(p){ p.desc=val; save(); }
+  const display=$('proj-desc-display');
+  if(display){
+    display.innerHTML=`<div style="font-size:12px;color:var(--muted);cursor:pointer;border-bottom:1px dashed transparent;transition:border-color .15s"
+      onmouseover="this.style.borderBottomColor='var(--border2)'"
+      onmouseout="this.style.borderBottomColor='transparent'"
+      onclick="startEditProjDesc(${projId})" title="點擊編輯說明">${esc(val)||'點擊新增說明…'}</div>`;
+    render();
+  }
+}
+
+function updateProjStatus(projId, status){
+  const p=projects.find(x=>x.id===projId);
+  if(p){ p.status=status; save(); render(); }
+}
+
+function updateProjDate(projId, field, val){
+  const p=projects.find(x=>x.id===projId);
+  if(p){ p[field]=val; save(); }
+}
+
+function openEditProjectColor(projId){
+  const p=projects.find(x=>x.id===projId);
+  if(!p) return;
+  const colors=['#534AB7','#1D9E75','#EF9F27','#D85A30','#185FA5','#D4537E','#0F6E56','#BA7517','#A32D2D','#888780'];
+  openModal(`
+  <div class="modal-title">更換專案顏色</div>
+  <div style="display:flex;flex-wrap:wrap;gap:12px;padding:8px 0 20px">
+    ${colors.map(c=>`<div style="width:36px;height:36px;border-radius:8px;background:${c};cursor:pointer;border:3px solid ${c===p.color?'var(--text)':'transparent'};transition:transform .1s"
+      onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform=''"
+      onclick="changeProjectColor(${projId},'${c}')"></div>`).join('')}
+  </div>
+  <div class="modal-btns"><button class="btn" onclick="closeModal()">取消</button></div>`);
+}
+
+function changeProjectColor(projId, color){
+  const p=projects.find(x=>x.id===projId);
+  if(p){ p.color=color; save(); closeModal(); openProjectDetail(projId); }
+}
+
+/* ─── Task Detail Panel ─── */
+function openTaskDetail(projId, taskId){
+  const p=projects.find(x=>x.id===projId);
+  if(!p) return;
+  const t=(p.tasks||[]).find(x=>x.id===taskId);
+  if(!t) return;
+  t.comments=t.comments||[];
+
+  $('detail-mount').innerHTML=`<div class="detail-overlay" onclick="if(event.target===this)closeDetail()">
+  <div class="detail-panel">
+    <div class="detail-head">
+      <div>
+        <div class="detail-title">${esc(t.title)}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px">
+          <span style="cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="closeDetail();openProjectDetail(${projId})">${esc(p.name)}</span>
+        </div>
+      </div>
+      <button class="close-btn" onclick="closeDetail()"><svg viewBox="0 0 14 14"><path d="M2 2l10 10M12 2L2 12"/></svg></button>
+    </div>
+    <div class="detail-body">
+
+      <div class="detail-section">
+        <div class="detail-section-title">任務資訊</div>
+        <div class="detail-meta-grid">
+          <div class="detail-meta-item"><div class="detail-meta-label">狀態</div>
+            <select class="form-ctrl" style="padding:4px 8px;font-size:12px" onchange="updateTaskStatus(${projId},${taskId},this.value)">
+              ${['todo','in','done','block'].map(s=>`<option value="${s}" ${t.status===s?'selected':''}>${statusLabel(s)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="detail-meta-item"><div class="detail-meta-label">優先級</div>
+            <select class="form-ctrl" style="padding:4px 8px;font-size:12px" onchange="updateTaskPriority(${projId},${taskId},this.value)">
+              <option value="high" ${t.priority==='high'?'selected':''}>高</option>
+              <option value="med" ${t.priority==='med'?'selected':''}>中</option>
+              <option value="low" ${t.priority==='low'?'selected':''}>低</option>
+            </select>
+          </div>
+          <div class="detail-meta-item"><div class="detail-meta-label">負責人</div><div class="detail-meta-val">${esc(t.assignee||'未指定')}</div></div>
+          <div class="detail-meta-item"><div class="detail-meta-label">截止日</div><div class="detail-meta-val" style="font-family:var(--mono);font-size:12px">${esc(t.due||'—')}</div></div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">討論與註解（${t.comments.length}）</div>
+        <div class="comments-list" id="comments-list">
+          ${t.comments.length===0?`<div style="padding:16px;text-align:center;font-size:13px;color:var(--hint)">還沒有任何討論，加入第一則留言吧</div>`
+            :t.comments.map(c=>`
+          <div class="comment-item">
+            <div class="comment-avatar">${esc(c.avatar||c.author[0])}</div>
+            <div class="comment-body">
+              <div class="comment-meta"><span class="comment-author">${esc(c.author)}</span><span>${esc(c.time)}</span></div>
+              <div class="comment-text">${esc(c.text)}</div>
+            </div>
+          </div>`).join('')}
+        </div>
+        <div class="comment-add-row">
+          <div class="comment-avatar" style="margin-top:2px">你</div>
+          <textarea class="comment-input" id="comment-inp" rows="2" placeholder="加入討論或備註..."></textarea>
+          <button class="btn btn-primary btn-sm" style="align-self:flex-end" onclick="submitComment(${projId},${taskId})">送出</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  </div>`;
+}
+
+function updateTaskStatus(projId,taskId,newStatus){
+  const p=projects.find(x=>x.id===projId);
+  if(!p) return;
+  const t=(p.tasks||[]).find(x=>x.id===taskId);
+  if(t){t.status=newStatus;save();}
+}
+function updateTaskPriority(projId,taskId,pri){
+  const p=projects.find(x=>x.id===projId);
+  if(!p) return;
+  const t=(p.tasks||[]).find(x=>x.id===taskId);
+  if(t){t.priority=pri;save();}
+}
+
+function submitComment(projId,taskId){
+  const inp=$('comment-inp');
+  if(!inp) return;
+  const txt=inp.value.trim();
+  if(!txt) return;
+  const p=projects.find(x=>x.id===projId);
+  if(!p) return;
+  const t=(p.tasks||[]).find(x=>x.id===taskId);
+  if(!t) return;
+  t.comments=t.comments||[];
+  const now=new Date();
+  const timeStr=`${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  t.comments.push({id:Date.now(),author:'你',avatar:'你',text:txt,time:timeStr});
+  save();
+  inp.value='';
+  // Re-render comments in place
+  const cl=$('comments-list');
+  if(cl) cl.innerHTML=t.comments.map(c=>`
+  <div class="comment-item">
+    <div class="comment-avatar">${esc(c.avatar||c.author[0])}</div>
+    <div class="comment-body">
+      <div class="comment-meta"><span class="comment-author">${esc(c.author)}</span><span>${esc(c.time)}</span></div>
+      <div class="comment-text">${esc(c.text)}</div>
+    </div>
+  </div>`).join('');
+  if(inp) inp.focus();
+}
+
+function closeDetail(){$('detail-mount').innerHTML=''}
+
+/* ─── Add task to project ─── */
+function openAddTaskToProject(projId){
+  closeDetail();
+  openModal(`
+  <div class="modal-title">新增任務</div>
+  <div class="form-row"><label class="form-label">任務名稱 *</label><input class="form-ctrl" id="t-title" placeholder="輸入任務名稱..."></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="form-row"><label class="form-label">優先級</label>
+      <select class="form-ctrl" id="t-pri">
+        <option value="high">高</option><option value="med" selected>中</option><option value="low">低</option>
+      </select>
+    </div>
+    <div class="form-row"><label class="form-label">負責人</label><input class="form-ctrl" id="t-assignee" placeholder="例：王小明"></div>
+  </div>
+  <div class="form-row"><label class="form-label">截止日</label><input class="form-ctrl" id="t-due" type="date"></div>
+  <div class="modal-btns">
+    <button class="btn" onclick="closeModal()">取消</button>
+    <button class="btn btn-primary" onclick="submitTaskToProject(${projId})">新增任務</button>
+  </div>`, ()=>$('t-title')&&$('t-title').focus());
+}
+
+function submitTaskToProject(projId){
+  const title=$('t-title').value.trim();
+  if(!title) return;
+  const p=projects.find(x=>x.id===projId);
+  if(!p) return;
+  const dueEl=$('t-due').value;
+  const dueStr=dueEl?new Date(dueEl).toLocaleDateString('zh-TW',{month:'numeric',day:'numeric'})+'日':'';
+  p.tasks.push({
+    id:Date.now(),title,status:'todo',
+    priority:$('t-pri').value,
+    assignee:$('t-assignee').value.trim()||'你',
+    due:dueStr,comments:[]
+  });
+  save();
+  closeModal();
+  openProjectDetail(projId);
+}
+
+/* ─── Kanban Add Task ─── */
+function openAddTask(defaultStatus){
+  const projOpts=projects.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
+  openModal(`
+  <div class="modal-title">新增任務到看板</div>
+  <div class="form-row"><label class="form-label">任務名稱 *</label><input class="form-ctrl" id="kt-title" placeholder="輸入任務名稱..."></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="form-row"><label class="form-label">所屬專案</label>
+      <select class="form-ctrl" id="kt-proj">${projOpts}</select>
+    </div>
+    <div class="form-row"><label class="form-label">優先級</label>
+      <select class="form-ctrl" id="kt-pri">
+        <option value="high">高</option><option value="med" selected>中</option><option value="low">低</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-row"><label class="form-label">負責人</label><input class="form-ctrl" id="kt-assignee" placeholder="例：你"></div>
+  <div class="form-row"><label class="form-label">截止日</label><input class="form-ctrl" id="kt-due" type="date"></div>
+  <div class="modal-btns">
+    <button class="btn" onclick="closeModal()">取消</button>
+    <button class="btn btn-primary" onclick="submitKanbanTask('${defaultStatus||'todo'}')">新增</button>
+  </div>`, ()=>$('kt-title')&&$('kt-title').focus());
+}
+
+function submitKanbanTask(status){
+  const title=$('kt-title').value.trim();
+  if(!title) return;
+  const projId=parseInt($('kt-proj').value);
+  const p=projects.find(x=>x.id===projId);
+  if(!p) return;
+  const dueEl=$('kt-due').value;
+  const dueStr=dueEl?new Date(dueEl).toLocaleDateString('zh-TW',{month:'numeric',day:'numeric'})+'日':'';
+  p.tasks.push({
+    id:Date.now(),title,status,
+    priority:$('kt-pri').value,
+    assignee:$('kt-assignee').value.trim()||'你',
+    due:dueStr,comments:[]
+  });
+  save(); closeModal(); render();
+}
+
+/* ─── Add Project ─── */
+function openAddProject(){
+  openModal(`
+  <div class="modal-title">新增專案</div>
+  <div class="form-row"><label class="form-label">專案名稱 *</label><input class="form-ctrl" id="p-name" placeholder="例：新官網設計"></div>
+  <div class="form-row"><label class="form-label">描述</label><input class="form-ctrl" id="p-desc" placeholder="簡短說明目標"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="form-row"><label class="form-label">開始日</label><input class="form-ctrl" id="p-start" type="date"></div>
+    <div class="form-row"><label class="form-label">截止日</label><input class="form-ctrl" id="p-end" type="date"></div>
+  </div>
+  <div class="form-row"><label class="form-label">初始狀態</label>
+    <select class="form-ctrl" id="p-status">
+      <option value="on">正常進行</option><option value="at">需要注意</option><option value="de">已延遲</option>
+    </select>
+  </div>
+  <div class="modal-btns">
+    <button class="btn" onclick="closeModal()">取消</button>
+    <button class="btn btn-primary" onclick="submitProject()">建立專案</button>
+  </div>`, ()=>$('p-name')&&$('p-name').focus());
+}
+
+function submitProject(){
+  const name=$('p-name').value.trim();
+  if(!name) return;
+  projects.push({
+    id:Date.now(),name,desc:$('p-desc').value.trim()||'',
+    progress:0,color:COLORS[projects.length%COLORS.length],
+    startDate:$('p-start').value||'',endDate:$('p-end').value||'',
+    status:$('p-status').value,tasks:[]
+  });
+  save(); closeModal(); render();
+}
+
+
+/* ── 待辦事項 細節面板 ── */
+function openTodoDetail(id){
+  const t=todos.find(x=>x.id===id);
+  if(!t) return;
+  const priMap={high:{cls:'tg-d',lbl:'高優先'},med:{cls:'tg-a',lbl:'中優先'},low:{cls:'tg-t',lbl:'低優先'}};
+  const pri=priMap[t.priority]||priMap.med;
+  const dm=$('detail-mount');
+  dm.innerHTML=`<div class="detail-overlay" onclick="if(event.target===this)closeDetail()">
+  <div class="detail-panel" style="width:440px">
+    <div class="detail-head">
+      <div style="flex:1;min-width:0">
+        <div class="detail-title" style="${t.done?'text-decoration:line-through;color:var(--hint)':''}">${esc(t.text)}</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+          <span class="tag ${t.tagCls}" style="font-size:11px">${esc(t.tag)}</span>
+          <span class="tag ${pri.cls}" style="font-size:11px">${pri.lbl}</span>
+          ${t.done?'<span class="tag tg-t" style="font-size:11px">已完成</span>':''}
+        </div>
+      </div>
+      <button class="close-btn" onclick="closeDetail()"><svg viewBox="0 0 14 14"><path d="M2 2l10 10M12 2L2 12"/></svg></button>
+    </div>
+    <div class="detail-body">
+
+      <div class="detail-section">
+        <div class="detail-meta-grid">
+          <div class="detail-meta-item">
+            <div class="detail-meta-label">起始日</div>
+            <div class="detail-meta-val" style="font-family:var(--mono);font-size:12px">${esc(t.startDate||'—')}</div>
+          </div>
+          <div class="detail-meta-item">
+            <div class="detail-meta-label">截止日</div>
+            <div class="detail-meta-val" style="font-family:var(--mono);font-size:12px;${t.overdue&&!t.done?'color:var(--danger)':''}">${esc(t.due||'—')}</div>
+          </div>
+          <div class="detail-meta-item">
+            <div class="detail-meta-label">所屬專案</div>
+            <div class="detail-meta-val" style="font-size:12px">${esc(t.project||'—')}</div>
+          </div>
+          <div class="detail-meta-item">
+            <div class="detail-meta-label">建立時間</div>
+            <div class="detail-meta-val" style="font-family:var(--mono);font-size:12px">${t.created?new Date(t.created).toLocaleDateString('zh-TW',{month:'numeric',day:'numeric'}):'—'}</div>
+          </div>
+        </div>
+      </div>
+
+      ${t.desc?`<div class="detail-section">
+        <div class="detail-section-title">說明備註</div>
+        <div style="font-size:13px;color:var(--text);line-height:1.7;padding:10px 12px;background:var(--bg);border-radius:8px">${esc(t.desc)}</div>
+      </div>`:''}
+
+      <div class="detail-section">
+        <div class="detail-section-title">快速操作</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" onclick="closeDetail();toggleTodo(${t.id})">
+            ${t.done?'<svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 7h10M7 2l5 5-5 5"/></svg> 標記未完成':'<svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="2,7 5,10 12,3"/></svg> 標記完成'}
+          </button>
+          <button class="btn" onclick="closeDetail();openAddTodoTask({id:${t.id},text:'${esc(t.text).replace(/'/g,"\'")}',desc:'${esc(t.desc||'').replace(/'/g,"\'")}',priority:'${t.priority}',tag:'${t.tag}',startDate:'${t.dueDate||''}',dueDate:'${t.dueDate||''}',project:'${esc(t.project||'')}'})">
+            <svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 2l3 3-8 8H1v-3z"/></svg>
+            編輯
+          </button>
+          <button class="btn" style="color:var(--danger);border-color:var(--danger)" onclick="closeDetail();if(confirm('確定刪除「${esc(t.text).replace(/'/g,"\'")}」？'))deleteTodo(${t.id})">
+            <svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 4h10M6 4V3h2v1M5 4v7M9 4v7M3 4l.5 8h7L11 4"/></svg>
+            刪除
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  </div>`;
+}
+
+/* ═══════════════════ TODO ═══════════════════ */
+function renderTodo(c,ta){
+  ta.innerHTML=`<button class="btn btn-primary" onclick="openAddTodoTask()"><svg viewBox="0 0 12 12"><path d="M6 1v10M1 6h10"/></svg>新增任務</button>`;
+  const total=todos.filter(t=>!t.done).length;
+  const high=todos.filter(t=>t.priority==='high'&&!t.done).length;
+  const overdue=todos.filter(t=>t.overdue&&!t.done).length;
+  const done=todos.filter(t=>t.done).length;
+  let filtered=[...todos];
+  if(todoFilter==='today') filtered=todos.filter(t=>t.due==='今天'||t.due==='昨天');
+  else if(todoFilter==='high') filtered=todos.filter(t=>t.priority==='high');
+  else if(todoFilter==='done') filtered=todos.filter(t=>t.done);
+
+  c.innerHTML=`
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-label">待完成</div><div class="stat-val">${total}</div><div class="stat-sub">項任務</div></div>
+    <div class="stat-card"><div class="stat-label">高優先</div><div class="stat-val" style="color:var(--danger)">${high}</div><div class="stat-sub" style="color:var(--danger)">需優先處理</div></div>
+    <div class="stat-card"><div class="stat-label">已逾期</div><div class="stat-val" style="color:var(--warn)">${overdue}</div><div class="stat-sub" style="color:var(--warn)">請盡快處理</div></div>
+    <div class="stat-card"><div class="stat-label">已完成</div><div class="stat-val" style="color:var(--success)">${done}</div><div class="stat-sub" style="color:var(--success)">累計完成</div></div>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <span class="card-title">任務清單</span>
+      <div class="filter-row">
+        <span class="fpill ${todoFilter==='all'?'active':''}" onclick="setTodoFilter('all')">全部</span>
+        <span class="fpill ${todoFilter==='today'?'active':''}" onclick="setTodoFilter('today')">今天</span>
+        <span class="fpill ${todoFilter==='high'?'active':''}" onclick="setTodoFilter('high')">高優先</span>
+        <span class="fpill ${todoFilter==='done'?'active':''}" onclick="setTodoFilter('done')">已完成</span>
+      </div>
+    </div>
+    ${filtered.length===0?`<div style="padding:32px;text-align:center;font-size:13px;color:var(--hint)">無符合項目</div>`:
+      filtered.map(t=>`
+      <div class="todo-item ${t.done?'done':''}" style="cursor:pointer" onclick="openTodoDetail(${t.id})">
+        <div class="pdot p${t.priority[0]}"></div>
+        <div class="check-ring ${t.done?'checked':''}" onclick="event.stopPropagation();toggleTodo(${t.id})">
+          <svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div class="todo-text" style="${t.done?'text-decoration:line-through;color:var(--hint)':''}">${esc(t.text)}</div>
+          ${t.desc?`<div style="font-size:11px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.desc)}</div>`:''}
+        </div>
+        <div class="todo-meta">
+          <span class="tag ${t.tagCls}">${esc(t.tag)}</span>
+          ${t.startDate?`<span style="font-size:11px;color:var(--hint);font-family:var(--mono)">${esc(t.startDate)}</span>`:''}
+          <span class="due-txt ${t.overdue&&!t.done?'due-ov':''}">${esc(t.due)}</span>
+          <button class="btn btn-ghost btn-sm" style="padding:2px 6px;color:var(--hint)" onclick="event.stopPropagation();deleteTodo(${t.id})">
+            <svg viewBox="0 0 12 12" width="11" height="11"><path d="M2 3h8M5 3V2h2v1M4 3v6M8 3v6M3 3l.5 7h5L9 3"/></svg>
+          </button>
+        </div>
+      </div>`).join('')}
+    <div class="add-row">
+      <input class="add-inp" id="quick-add" placeholder="快速新增... (Enter)" onkeydown="if(event.key==='Enter')quickAdd()">
+      <button class="btn btn-primary" onclick="quickAdd()">新增</button>
+    </div>
+  </div>`;
+}
+
+function setTodoFilter(f){todoFilter=f;render()}
+function toggleTodo(id){const t=todos.find(x=>x.id===id);if(t){t.done=!t.done;save();render()}}
+function deleteTodo(id){todos=todos.filter(x=>x.id!==id);save();render()}
+function quickAdd(){
+  const inp=$('quick-add');const txt=inp.value.trim();if(!txt)return;
+  todos.unshift({id:Date.now(),text:txt,done:false,priority:'med',tag:'工作',tagCls:'tg-p',due:'未設定',overdue:false,project:'',created:Date.now()});
+  save();inp.value='';render();
+}
+function openAddTodoTask(prefill){
+  const pf=prefill||{};
+  const projOpts=projects.map(p=>`<option value="${esc(p.name)}">${esc(p.name)}</option>`).join('');
+  const today=new Date().toISOString().split('T')[0];
+  openModal(`
+  <div class="modal-title">${pf.id?'編輯任務':'新增工作任務'}</div>
+  <div class="form-row"><label class="form-label">任務名稱 *</label>
+    <input class="form-ctrl" id="m-text" placeholder="輸入任務描述..." value="${esc(pf.text||'')}">
+  </div>
+  <div class="form-row"><label class="form-label">說明備註</label>
+    <textarea class="form-ctrl" id="m-desc" rows="2" placeholder="詳細說明、備註..." style="resize:vertical">${esc(pf.desc||'')}</textarea>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="form-row"><label class="form-label">優先級</label>
+      <select class="form-ctrl" id="m-pri">
+        <option value="high" ${pf.priority==='high'?'selected':''}>高</option>
+        <option value="med" ${!pf.priority||pf.priority==='med'?'selected':''}>中</option>
+        <option value="low" ${pf.priority==='low'?'selected':''}>低</option>
+      </select>
+    </div>
+    <div class="form-row"><label class="form-label">分類</label>
+      <select class="form-ctrl" id="m-tag">
+        <option value="工作|tg-p" ${(pf.tag==='工作')?'selected':''}>工作</option>
+        <option value="會議|tg-p" ${(pf.tag==='會議')?'selected':''}>會議</option>
+        <option value="產品|tg-b" ${(pf.tag==='產品')?'selected':''}>產品</option>
+        <option value="技術|tg-t" ${(pf.tag==='技術')?'selected':''}>技術</option>
+        <option value="客戶|tg-a" ${(pf.tag==='客戶')?'selected':''}>客戶</option>
+        <option value="維修|tg-a" ${(pf.tag==='維修')?'selected':''}>維修</option>
+        <option value="行政|tg-a" ${(pf.tag==='行政')?'selected':''}>行政</option>
+        <option value="人事|tg-t" ${(pf.tag==='人事')?'selected':''}>人事</option>
+        <option value="採購|tg-a" ${(pf.tag==='採購')?'selected':''}>採購</option>
+        <option value="個人|tg-t" ${(pf.tag==='個人')?'selected':''}>個人</option>
+      </select>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="form-row"><label class="form-label">起始日</label>
+      <input class="form-ctrl" id="m-start" type="date" value="${pf.startDate||today}">
+    </div>
+    <div class="form-row"><label class="form-label">截止日</label>
+      <input class="form-ctrl" id="m-due" type="date" value="${pf.dueDate||''}">
+    </div>
+  </div>
+  <div class="form-row"><label class="form-label">所屬專案</label>
+    <select class="form-ctrl" id="m-proj">
+      <option value="">— 無 —</option>${projOpts}
+    </select>
+  </div>
+  <div class="modal-btns">
+    <button class="btn" onclick="closeModal()">取消</button>
+    <button class="btn btn-primary" onclick="submitTodoTask('${pf.id||''}')">
+      ${pf.id?'儲存修改':'新增任務'}
+    </button>
+  </div>`, ()=>$('m-text')&&$('m-text').focus());
+  if(pf.project && $('m-proj')){
+    Array.from($('m-proj').options).forEach(o=>{if(o.value===pf.project)o.selected=true;});
+  }
+}
+function submitTodoTask(editId){
+  const txt=$('m-text').value.trim();if(!txt)return;
+  const tagVal=$('m-tag').value.split('|');
+  const dueEl=$('m-due').value;
+  const startEl=$('m-start').value;
+  const dueStr=dueEl?new Date(dueEl).toLocaleDateString('zh-TW',{month:'numeric',day:'numeric'})+'日':'未設定';
+  const startStr=startEl?new Date(startEl).toLocaleDateString('zh-TW',{month:'numeric',day:'numeric'}):'';
+  if(editId){
+    const t=todos.find(x=>x.id===parseInt(editId)||x.id===editId);
+    if(t){
+      t.text=txt; t.desc=$('m-desc').value.trim();
+      t.priority=$('m-pri').value; t.tag=tagVal[0]; t.tagCls=tagVal[1]||'tg-p';
+      t.due=dueStr; t.dueDate=dueEl; t.startDate=startStr;
+      t.project=$('m-proj').value;
+    }
+  } else {
+    todos.unshift({id:Date.now(),text:txt,desc:$('m-desc').value.trim(),done:false,
+      priority:$('m-pri').value,tag:tagVal[0],tagCls:tagVal[1]||'tg-p',
+      due:dueStr,dueDate:dueEl,startDate:startStr,overdue:false,
+      project:$('m-proj').value,created:Date.now()});
+  }
+  save();closeModal();render();
+}
+
+/* ═══════════════════ CALENDAR ═══════════════════ */
+let gcalAuth    = null;   // { authed, name, email, picture }
+let gcalList    = [];     // [{ id, summary, backgroundColor, selected }]
+let gcalEvents  = [];     // 已載入的事件
+let gcalLoading = false;
+let selectedCals= [];     // 使用者選擇要顯示的日曆 id
+
+async function calCheckAuth(){
+  try{
+    const controller = new AbortController();
+    const tid = setTimeout(()=>controller.abort(), 4000);
+    const r = await fetch('/api/auth/status', {signal: controller.signal});
+    clearTimeout(tid);
+    gcalAuth = await r.json();
+  } catch(e){ gcalAuth={authed:false}; }
+}
+
+async function calLoadCalendars(){
+  try{
+    const r = await fetch('/api/calendars');
+    if(r.status===401){ gcalAuth={authed:false}; return; }
+    const d = await r.json();
+    gcalList = d.calendars||[];
+    if(selectedCals.length===0) selectedCals = gcalList.map(c=>c.id);
+  } catch(e){}
+}
+
+async function calLoadEvents(){
+  if(!selectedCals.length){ renderCalendarContent(); return; }
+  gcalLoading=true; renderCalendarContent();
+  try{
+    const ids = selectedCals.join(',');
+    const controller = new AbortController();
+    const tid = setTimeout(()=>controller.abort(), 10000);
+    const r = await fetch(`/api/events?cal=${encodeURIComponent(ids)}`, {signal: controller.signal});
+    clearTimeout(tid);
+    if(r.status===401){ gcalAuth={authed:false}; gcalLoading=false; renderCalendarContent(); return; }
+    const d = await r.json();
+    gcalEvents = d.events||[];
+  } catch(e){ gcalEvents=[]; }
+  gcalLoading=false; renderCalendarContent();
+}
+
+function calFmtTime(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',hour12:false});
+}
+function calFmtDate(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  const now = new Date();
+  const today = new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const evDay = new Date(d.getFullYear(),d.getMonth(),d.getDate());
+  const diff  = Math.round((evDay-today)/(1000*60*60*24));
+  if(diff===0) return '今天';
+  if(diff===1) return '明天';
+  if(diff===2) return '後天';
+  return d.toLocaleDateString('zh-TW',{month:'numeric',day:'numeric',weekday:'short'});
+}
+function calIsToday(iso){
+  const d=new Date(iso), n=new Date();
+  return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()&&d.getDate()===n.getDate();
+}
+function calColorDot(ev){
+  const cal = gcalList.find(c=>c.id===ev.calendarId);
+  const bg  = ev.color || (cal?cal.backgroundColor:'#4285F4');
+  return `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${bg};flex-shrink:0"></span>`;
+}
+
+function renderCalendarContent(){
+  const c=$('cal-content'); if(!c) return;
+
+  if(!gcalAuth||!gcalAuth.authed){
+    c.innerHTML=`
+    <div class="card" style="padding:36px 24px;text-align:center">
+      <div style="width:52px;height:52px;border-radius:50%;background:var(--bg);margin:0 auto 16px;display:flex;align-items:center;justify-content:center">
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="4" width="22" height="20" rx="2"/><path d="M8 2v4M18 2v4M2 10h22"/><circle cx="8" cy="16" r="1.5" fill="var(--muted)" stroke="none"/><circle cx="13" cy="16" r="1.5" fill="var(--muted)" stroke="none"/><circle cx="18" cy="16" r="1.5" fill="var(--muted)" stroke="none"/></svg>
+      </div>
+      <div style="font-size:15px;font-weight:500;margin-bottom:6px">連結 Google 日曆</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px">授權後即可顯示您的工作行程、群組日曆<br>與 Google Meet 會議連結</div>
+      <button class="btn btn-primary" style="font-size:14px;padding:9px 24px" onclick="calStartAuth()">
+        <svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="1" y="3" width="16" height="14" rx="2"/><path d="M6 1v4M12 1v4M1 8h16"/></svg>
+        使用 Google 帳號授權
+      </button>
+    </div>`;
+    return;
+  }
+
+  const now   = new Date();
+  const todayEvs = gcalEvents.filter(ev=>calIsToday(ev.start));
+  const upEvs    = gcalEvents.filter(ev=>!calIsToday(ev.start));
+
+  c.innerHTML=`
+  <div class="card">
+    <div class="card-head">
+      <div style="display:flex;align-items:center;gap:10px">
+        ${gcalAuth.picture?`<img src="${gcalAuth.picture}" style="width:26px;height:26px;border-radius:50%;object-fit:cover" referrerpolicy="no-referrer">`:''}
+        <div>
+          <div style="font-size:13px;font-weight:500">${esc(gcalAuth.name||'')}</div>
+          <div style="font-size:11px;color:var(--hint)">${esc(gcalAuth.email||'')}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-sm" onclick="calLoadEvents()" title="重新整理">
+          <svg viewBox="0 0 13 13" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M11 6.5A4.5 4.5 0 1 1 7.5 2.1"/><polyline points="11,2 11,6 7,6"/></svg>
+          重新整理
+        </button>
+        <button class="btn btn-sm" onclick="calLogout()">登出</button>
+      </div>
+    </div>
+
+    <!-- 日曆篩選器 -->
+    <div style="padding:10px 16px;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:11px;color:var(--hint);font-weight:500">顯示日曆（${gcalList.length} 個）</span>
+        <div style="display:flex;gap:6px">
+          <span style="font-size:11px;color:var(--accent);cursor:pointer" onclick="selectedCals=gcalList.map(c=>c.id);renderCalendarContent();calLoadEvents()">全選</span>
+          <span style="font-size:11px;color:var(--hint)">·</span>
+          <span style="font-size:11px;color:var(--muted);cursor:pointer" onclick="selectedCals=[];renderCalendarContent()">全清</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+      ${gcalList.length===0
+        ? '<span style="font-size:12px;color:var(--hint)">載入中…</span>'
+        : gcalList.map(cal=>{
+          const active = selectedCals.includes(cal.id);
+          const bg = cal.backgroundColor||'#4285F4';
+          return `<span
+            style="cursor:pointer;display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:12px;border:1.5px solid ${active?bg:'var(--border)'};background:${active?bg+'18':'transparent'};color:${active?'var(--text)':'var(--muted)'};transition:all .15s"
+            onclick="calToggleCal('${cal.id.replace(/'/g,"\\'")}')">
+            <span style="width:8px;height:8px;border-radius:50%;background:${bg};flex-shrink:0;opacity:${active?1:0.4}"></span>
+            ${esc(cal.summary)}
+          </span>`;
+        }).join('')}
+      </div>
+    </div>
+  </div>
+
+  <!-- 今日行程 -->
+  <div class="card">
+    <div class="card-head">
+      <span class="card-title">今日行程</span>
+      <span style="font-size:11px;color:var(--hint)">${now.toLocaleDateString('zh-TW',{month:'long',day:'numeric',weekday:'short'})}</span>
+    </div>
+    ${gcalLoading?`<div style="padding:24px;text-align:center;font-size:13px;color:var(--hint)">載入中…</div>`:
+      todayEvs.length===0
+        ?`<div style="padding:24px;text-align:center;font-size:13px;color:var(--hint)">今天沒有行程，好好休息</div>`
+        :todayEvs.map(ev=>`
+      <div style="display:flex;align-items:stretch;gap:0;border-bottom:1px solid var(--border);transition:background .1s" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+        <div style="width:4px;flex-shrink:0;background:${(gcalList.find(c=>c.id===ev.calendarId)||{}).backgroundColor||'#4285F4'}"></div>
+        <div style="padding:12px 14px;flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+            <span style="font-size:13px;font-weight:500;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(ev.title)}</span>
+            ${ev.meetLink?`<a href="${ev.meetLink}" target="_blank" style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:6px;background:var(--info-l);color:var(--info);font-size:11px;font-weight:500;text-decoration:none;flex-shrink:0">
+              <svg viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 1l2 2-2 2M11 3H7M5 3H1v8h10V7"/></svg>Meet</a>`:''}
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;font-size:11px;color:var(--hint)">
+            <span style="font-family:var(--mono)">${ev.allDay?'全天':calFmtTime(ev.start)+' – '+calFmtTime(ev.end)}</span>
+            ${ev.location?`<span style="display:flex;align-items:center;gap:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px"><svg viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 1C4.3 1 3 2.3 3 4c0 2.6 3 7 3 7s3-4.4 3-7c0-1.7-1.3-3-3-3z"/><circle cx="6" cy="4" r="1"/></svg>${esc(ev.location)}</span>`:''}
+            ${ev.attendees&&ev.attendees.length?`<span>${ev.attendees.length} 位與會者</span>`:''}
+          </div>
+        </div>
+      </div>`).join('')}
+  </div>
+
+  <!-- 未來 14 天 -->
+  <div class="card">
+    <div class="card-head"><span class="card-title">未來 14 天行程</span><span style="font-size:11px;color:var(--hint)">${upEvs.length} 個事件</span></div>
+    ${gcalLoading?`<div style="padding:20px;text-align:center;font-size:13px;color:var(--hint)">載入中…</div>`:
+      upEvs.length===0
+        ?`<div style="padding:20px;text-align:center;font-size:13px;color:var(--hint)">未來 14 天沒有其他行程</div>`
+        :upEvs.map(ev=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:9px 16px;border-bottom:1px solid var(--border);transition:background .1s" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+        <div style="width:42px;flex-shrink:0;text-align:center">
+          <div style="font-size:11px;color:var(--hint);font-family:var(--mono)">${calFmtDate(ev.start)}</div>
+          ${!ev.allDay?`<div style="font-size:11px;color:var(--muted);font-family:var(--mono)">${calFmtTime(ev.start)}</div>`:''}
+        </div>
+        <div style="width:3px;height:30px;border-radius:2px;background:${(gcalList.find(c=>c.id===ev.calendarId)||{}).backgroundColor||'#4285F4'};flex-shrink:0"></div>
+        <span style="flex:1;font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(ev.title)}</span>
+        ${ev.meetLink?`<a href="${ev.meetLink}" target="_blank" style="font-size:11px;color:var(--info);text-decoration:none;flex-shrink:0">Meet</a>`:''}
+      </div>`).join('')}
+  </div>`;
+}
+
+async function renderCalendar(c,ta){
+  ta.innerHTML=`<button class="btn btn-sm" onclick="calLoadEvents()">
+    <svg viewBox="0 0 13 13" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M11 6.5A4.5 4.5 0 1 1 7.5 2.1"/><polyline points="11,2 11,6 7,6"/></svg>
+    重新整理
+  </button>`;
+  c.innerHTML=`<div id="cal-content" style="display:flex;flex-direction:column;gap:16px"><div class="card" style="padding:32px;text-align:center"><div style="font-size:13px;color:var(--muted)">正在確認授權狀態…</div></div></div>`;
+  try { await calCheckAuth(); } catch(e) { gcalAuth={authed:false}; }
+  if(gcalAuth&&gcalAuth.authed){
+    try{ await calLoadCalendars(); }catch(e){}
+    renderCalendarContent();
+    calLoadEvents();
+  } else {
+    renderCalendarContent();
+  }
+}
+
+async function calStartAuth(){
+  const r = await fetch('/api/auth/url');
+  const d = await r.json();
+  window.location.href = d.url;
+}
+
+async function calLogout(){
+  await fetch('/api/auth/logout',{method:'POST'});
+  gcalAuth={authed:false}; gcalList=[]; gcalEvents=[]; selectedCals=[];
+  renderCalendarContent();
+}
+
+function calToggleCal(id){
+  if(selectedCals.includes(id)) selectedCals=selectedCals.filter(x=>x!==id);
+  else selectedCals.push(id);
+  renderCalendarContent();
+  calLoadEvents();
+}
+
+/* ═══════════════════ NOTES ═══════════════════ */
+function renderNotes(c,ta){
+  ta.innerHTML=`<button class="btn btn-primary" onclick="openAddNote()"><svg viewBox="0 0 12 12"><path d="M6 1v10M1 6h10"/></svg>新增筆記</button>`;
+  c.innerHTML=`
+  <div class="card" style="padding:16px 20px;text-align:center">
+    <div style="display:inline-block;padding:3px 10px;border-radius:12px;background:var(--success-l);color:var(--success);font-size:11px;font-weight:500;margin-bottom:8px">Phase 2</div>
+    <div style="font-size:13px;font-weight:500;margin-bottom:4px">AI 摘要 & 行動項目（即將上線）</div>
+    <div style="font-size:12px;color:var(--muted)">Phase 2 加入 AI 自動摘要、關鍵字提取與待辦事項連動</div>
+  </div>
+  <div class="card">
+    <div class="card-head"><span class="card-title">筆記列表</span><span style="font-size:11px;color:var(--hint)">${notes.length} 篇</span></div>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:16px">
+      ${notes.map(n=>`
+      <div style="border:1px solid var(--border);border-radius:var(--radius);padding:14px;cursor:pointer;background:var(--surface);transition:border-color .15s"
+        onmouseover="this.style.borderColor='var(--border2)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="font-size:13px;font-weight:500;margin-bottom:4px">${esc(n.title)}</div>
+        <div style="font-size:11px;color:var(--hint);margin-bottom:8px;font-family:var(--mono)">${n.date}</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${esc(n.preview)}</div>
+        <div style="display:flex;gap:4px;margin-top:8px">${n.tags.map(t=>`<span class="tag tg-p" style="font-size:10px">${esc(t)}</span>`).join('')}</div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+function openAddNote(){
+  openModal(`
+  <div class="modal-title">新增筆記</div>
+  <div class="form-row"><label class="form-label">標題 *</label><input class="form-ctrl" id="n-title" placeholder="例：週一會議記錄"></div>
+  <div class="form-row"><label class="form-label">內容摘要</label><textarea class="form-ctrl" id="n-preview" rows="4" placeholder="輸入筆記重點..." style="resize:vertical"></textarea></div>
+  <div class="form-row"><label class="form-label">標籤（逗號分隔）</label><input class="form-ctrl" id="n-tags" placeholder="例：會議,產品"></div>
+  <div class="modal-btns">
+    <button class="btn" onclick="closeModal()">取消</button>
+    <button class="btn btn-primary" onclick="submitNote()">儲存筆記</button>
+  </div>`, ()=>$('n-title')&&$('n-title').focus());
+}
+function submitNote(){
+  const title=$('n-title').value.trim();if(!title)return;
+  const tags=$('n-tags').value.split(',').map(s=>s.trim()).filter(Boolean);
+  notes.unshift({id:Date.now(),title,date:new Date().toISOString().split('T')[0],preview:$('n-preview').value.trim(),tags});
+  save();closeModal();render();
+}
+
+
+/* ══════════════ VOICE ══════════════ */
+let _recognition = null;
+let _listening = false;
+let _transcript = '';
+let _lineSettings = null;
+
+
+
+function renderVoice(c,ta){
+  ta.innerHTML='';
+  c.innerHTML=`
+  <div class="card" style="padding:24px">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:16px;margin-bottom:24px">
+      <button class="mic-btn" id="mic-btn" onclick="toggleMic()">
+        <svg viewBox="0 0 16 16"><rect x="5" y="1" width="6" height="9" rx="3"/><path d="M3 8c0 2.8 2.2 5 5 5s5-2.2 5-5M8 13v2"/></svg>
+      </button>
+      <div id="mic-status" style="font-size:13px;color:var(--muted)">按下麥克風開始說話</div>
+    </div>
+    <div class="voice-transcript" id="voice-transcript" style="margin-bottom:16px">
+      <span style="color:var(--hint)">語音內容會顯示在這裡…</span>
+    </div>
+    <div id="intent-zone" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px"></div>
+    <div id="line-result" style="display:none"></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><span class="card-title">快捷指令</span></div>
+    <div style="padding:16px;display:flex;flex-wrap:wrap;gap:8px">
+      <button class="intent-btn" onclick="sendVoiceQuery('events','today')">
+        <svg viewBox="0 0 14 14"><rect x="1" y="2" width="12" height="11" rx="1.5"/><path d="M4 1v2M10 1v2M1 6h12"/></svg>
+        今天行程
+      </button>
+      <button class="intent-btn" onclick="sendVoiceQuery('events','tomorrow')">
+        <svg viewBox="0 0 14 14"><rect x="1" y="2" width="12" height="11" rx="1.5"/><path d="M4 1v2M10 1v2M1 6h12"/></svg>
+        明天行程
+      </button>
+      <button class="intent-btn" onclick="sendVoiceQuery('events','week')">
+        <svg viewBox="0 0 14 14"><rect x="1" y="2" width="12" height="11" rx="1.5"/><path d="M4 1v2M10 1v2M1 6h12"/></svg>
+        本週行程
+      </button>
+      <button class="intent-btn" onclick="sendVoiceQuery('todos',null)">
+        <svg viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" rx="2"/><polyline points="4,7 6,9 10,5"/></svg>
+        查詢待辦
+      </button>
+    </div>
+    <div style="padding:0 16px 14px;font-size:12px;color:var(--hint)">結果自動傳送到 LINE。可說：今天行程、明天有什麼、待辦事項、what's today 等。</div>
+  </div>`;
+}
+
+function toggleMic(){
+  if (_listening) { stopMic(); return; }
+  startMic();
+}
+
+function startMic(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { document.getElementById('mic-status').textContent='您的瀏覽器不支援語音辨識，請改用 Chrome'; return; }
+  _recognition = new SR();
+  _recognition.lang='zh-TW';
+  _recognition.interimResults=true;
+  _recognition.maxAlternatives=3;
+  _recognition.continuous=false;
+  _recognition.onstart=()=>{
+    _listening=true;
+    const btn=document.getElementById('mic-btn');
+    const st=document.getElementById('mic-status');
+    if(btn) btn.classList.add('listening');
+    if(st) st.textContent='聆聽中… 請說出您的指令';
+    document.getElementById('voice-transcript').innerHTML='<span style="color:var(--hint)">聆聽中…</span>';
+  };
+  _recognition.onresult=e=>{
+    const text=Array.from(e.results).map(r=>r[0].transcript).join('');
+    _transcript=text;
+    const el=document.getElementById('voice-transcript');
+    if(el) el.textContent=text;
+    if(e.results[e.results.length-1].isFinal) parseIntent(text);
+  };
+  _recognition.onerror=e=>{ stopMic(); const st=document.getElementById('mic-status'); if(st) st.textContent='辨識錯誤：'+e.error; };
+  _recognition.onend=()=>{ stopMic(); };
+  _recognition.start();
+}
+
+function stopMic(){
+  _listening=false;
+  const btn=document.getElementById('mic-btn');
+  const st=document.getElementById('mic-status');
+  if(btn) btn.classList.remove('listening');
+  if(st) st.textContent='按下麥克風開始說話';
+  if(_recognition){ try{_recognition.stop();}catch(e){} _recognition=null; }
+}
+
+function parseIntent(text){
+  const t=text.toLowerCase();
+  const iz=document.getElementById('intent-zone');
+  if(!iz) return;
+  let intent=null, range=null, addText=null;
+
+  if(/新增|加入|add/.test(t)){
+    intent='add_todo';
+    addText=text.replace(/^(芸兒)?[，,]?\s*(請|幫我|幫)?\s*(新增|加入|add)\s*/i,'').trim()||text;
+  } else if(/今天|today|今日/.test(t)){intent='events';range='today';}
+  else if(/明天|tomorrow/.test(t)){intent='events';range='tomorrow';}
+  else if(/本週|這週|week/.test(t)){intent='events';range='week';}
+  else if(/待辦|todo|任務|task/.test(t)){intent='todos';range=null;}
+
+  if(intent==='add_todo'&&addText){
+    const safeText=addText.replace(/'/g,'&#39;');
+    iz.innerHTML='<button class="intent-btn" style="background:var(--accent);color:#fff;border-color:var(--accent)" onclick="sendVoiceQuery(\'add_todo\',null,this.dataset.text)" data-text="'+safeText+'">新增「'+safeText+'」到待辦清單</button>';
+    iz.querySelector('button').addEventListener('click',function(){sendVoiceQuery('add_todo',null,addText);});
+  } else if(intent){
+    const labels={events:{today:'今天行程',tomorrow:'明天行程',week:'本週行程'}};
+    const label=intent==='events'?(labels.events[range]||text):'查詢待辦';
+    iz.innerHTML=`<button class="intent-btn" style="background:var(--accent);color:#fff;border-color:var(--accent)" onclick="sendVoiceQuery('${intent}','${range||''}')">
+      傳送「${label}」到 LINE
+    </button>`;
+  } else {
+    iz.innerHTML='<span style="font-size:12px;color:var(--hint)">未能辨識。可說：今天行程、明天有什麼、待辦事項、新增 XXX 任務</span>';
+  }
+}
+
+async function sendVoiceQuery(intent,range,addText){
+  const el=document.getElementById('line-result');
+  if(el){el.style.display='block';el.className='line-result';el.textContent='傳送中…';}
+  try{
+    const body={intent,range};
+    if(addText) body.text=addText;
+    const r=await fetch('/api/voice/query',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d=await r.json();
+    if(el){
+      if(d.ok){
+        if(d.action==='add_todo'){
+          el.className='line-result line-ok';
+          el.textContent='✓ 已新增待辦事項並傳送到 LINE！\n\n▪ '+addText;
+          render();
+        } else {
+          el.className='line-result line-ok';
+          el.textContent='✓ 已傳送到 LINE！\n\n'+(d.message||'');
+        }
+      } else {
+        el.className='line-result line-err';
+        el.textContent='✗ '+(d.error||'傳送失敗');
+      }
+    }
+  }catch(e){if(el){el.className='line-result line-err';el.textContent='✗ 連線錯誤：'+e.message;}}
+}
+
+/* ══════════════ LINE SETTINGS ══════════════ */
+async function renderLineSettings(c,ta){
+  ta.innerHTML='';
+  let cfg={dailyPush:true,dailyHour:7,dailyMinute:30};
+  try{ const r=await fetch('/api/config'); cfg=await r.json(); }catch(e){}
+  const h=String(cfg.dailyHour||7).padStart(2,'0'), mi=String(cfg.dailyMinute||30).padStart(2,'0');
+  const on=cfg.dailyPush!==false;
+  const parts=[
+    '<div class="card"><div class="card-head"><span class="card-title">LINE Messaging API 狀態</span></div>',
+    '<div style="padding:16px;display:flex;flex-direction:column;gap:12px">',
+    '<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--success-l);border-radius:var(--radius)">',
+    '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round"><polyline points="2,8 6,12 14,4"/></svg>',
+    '<div><div style="font-size:13px;font-weight:500;color:var(--success)">LINE Messaging API 已設定完成</div>',
+    '<div style="font-size:12px;color:var(--success)">訊息將傳送到您的 LINE 帳號</div></div></div>',
+    '<button class="btn btn-primary" onclick="testLine()" style="align-self:flex-start">傳送測試訊息到 LINE</button>',
+    '<div id="test-result" style="display:none;font-size:13px;padding:8px 12px;border-radius:8px"></div>',
+    '</div></div>',
+    '<div class="card"><div class="card-head"><span class="card-title">每日早晨自動推播</span></div>',
+    '<div style="padding:16px;display:flex;flex-direction:column;gap:14px">',
+    '<div style="display:flex;align-items:center;justify-content:space-between">',
+    '<div><div style="font-size:13px;font-weight:500">開啟每日推播</div>',
+    '<div style="font-size:12px;color:var(--muted)">自動傳送今日行程+高優先待辦到 LINE</div></div>',
+    '<label style="position:relative;width:40px;height:22px;cursor:pointer">',
+    '<input type="checkbox" id="daily-toggle" style="opacity:0;position:absolute;inset:0;cursor:pointer;width:100%;height:100%" onchange="updateToggleUI();saveDailySettings()">',
+    '<span id="toggle-track" style="position:absolute;inset:0;border-radius:11px;background:var(--border2);transition:background .2s;pointer-events:none"></span>',
+    '<span id="toggle-thumb" style="position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .2s;pointer-events:none"></span>',
+    '</label></div>',
+    '<div style="display:flex;align-items:center;gap:12px">',
+    '<span style="font-size:13px;color:var(--muted)">推播時間</span>',
+    '<input type="time" id="daily-time" class="form-ctrl" style="width:120px" onchange="saveDailySettings()">',
+    '</div><div id="daily-result" style="display:none;font-size:13px;padding:8px 12px;border-radius:8px"></div>',
+    '</div></div>',
+    '<div class="card"><div class="card-head"><span class="card-title">立即手動推播</span></div>',
+    '<div style="padding:16px;display:flex;gap:8px;flex-wrap:wrap">',
+    '<button class="btn" onclick="manualPush(String.fromCharCode(39)+\'events\'+String.fromCharCode(39))">推播今日行程</button>',
+    '<button class="btn" onclick="manualPush(String.fromCharCode(39)+\'todos\'+String.fromCharCode(39))">推播待辦清單</button>',
+    '<button class="btn btn-primary" onclick="manualDailyPush()">推播今日完整摘要</button>',
+    '<div id="push-result" style="display:none;font-size:13px;padding:8px 12px;border-radius:8px;width:100%"></div>',
+    '</div></div>'
+  ];
+  c.innerHTML=parts.join('');
+  document.getElementById('daily-toggle').checked=on;
+  updateToggleUI();
+  if(document.getElementById('daily-time')) document.getElementById('daily-time').value=h+':'+mi;
+}
+
+async function testLine(){
+  const el=document.getElementById('test-result');
+  if(el){el.style.display='block';el.style.background='var(--bg)';el.style.color='var(--muted)';el.textContent='傳送測試中…';}
+  try{
+    const r=await fetch('/api/line/test',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+    const d=await r.json();
+    if(el){
+      const ok=d.ok||(d.results&&d.results.some(x=>x.status===200));
+      if(ok){el.style.background='var(--success-l)';el.style.color='var(--success)';el.textContent='✓ 成功！請查看您的 LINE';}
+      else{
+        const detail=JSON.stringify(d.results||d,null,2);
+        el.style.background='var(--danger-l)';el.style.color='var(--danger)';el.textContent='✗ 失敗，詳情：'+detail;
+      }
+    }
+  }catch(e){if(el){el.style.background='var(--danger-l)';el.style.color='var(--danger)';el.textContent='✗ 連線錯誤：'+e.message;}}
+}
+
+async function saveDailySettings(){
+  const el=document.getElementById('daily-result');
+  const dailyPush=document.getElementById('daily-toggle').checked;
+  const timeVal=document.getElementById('daily-time').value;
+  const [h,mi]=timeVal.split(':').map(Number);
+  try{
+    await fetch('/api/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({dailyPush,dailyHour:h||7,dailyMinute:mi||30})});
+    if(el){el.style.display='block';el.style.background='var(--success-l)';el.style.color='var(--success)';
+      el.textContent=dailyPush?'✓ 已開啟！每天 '+timeVal+' 自動推播':'✓ 已關閉每日推播';}
+  }catch(e){if(el){el.style.display='block';el.style.background='var(--danger-l)';el.style.color='var(--danger)';el.textContent='✗ 儲存失敗';}}
+}
+
+async function manualPush(type){
+  const el=document.getElementById('push-result');
+  if(el){el.style.display='block';el.style.background='var(--bg)';el.style.color='var(--muted)';el.textContent='傳送中…';}
+  try{
+    const r=await fetch('/api/voice/query',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({intent:type==='todos'?'todos':'events',range:'today'})});
+    const d=await r.json();
+    if(el){
+      if(d.ok){el.style.background='var(--success-l)';el.style.color='var(--success)';el.textContent='✓ 已傳送到 LINE！';}
+      else{el.style.background='var(--danger-l)';el.style.color='var(--danger)';el.textContent='✗ '+(d.error||'傳送失敗');}
+    }
+  }catch(e){if(el){el.style.background='var(--danger-l)';el.style.color='var(--danger)';el.textContent='✗ 連線錯誤';}}
+}
+
+async function manualDailyPush(){
+  const el=document.getElementById('push-result');
+  if(el){el.style.display='block';el.style.background='var(--bg)';el.style.color='var(--muted)';el.textContent='傳送今日摘要中…';}
+  try{
+    const r=await fetch('/api/daily/push',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+    const d=await r.json();
+    if(el){
+      if(d.ok){el.style.background='var(--success-l)';el.style.color='var(--success)';el.textContent='✓ 今日摘要已傳送到 LINE！';}
+      else{el.style.background='var(--danger-l)';el.style.color='var(--danger)';el.textContent='✗ '+(d.error||'傳送失敗');}
+    }
+  }catch(e){if(el){el.style.background='var(--danger-l)';el.style.color='var(--danger)';el.textContent='✗ 連線錯誤';}}
+}
+
+
+/* ─── Modal ─── */
+function openModal(html,cb){
+  $('modal-mount').innerHTML=`<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal">${html}</div></div>`;
+  if(cb) setTimeout(cb,50);
+}
+function closeModal(){$('modal-mount').innerHTML=''}
+
+/* ═══════════════════ PERSONAL CALENDAR ═══════════════════ */
+/* 個人日曆：整合 Google 日曆，與工作日曆分開顯示，家庭共用視圖 */
+
+const FAMILY_MEMBERS = [
+  {id:'self',  name:'我（Ken）',  color:'#534AB7', avatar:'K'},
+  {id:'spouse',name:'配偶',       color:'#D4537E', avatar:'S'},
+  {id:'kid1',  name:'孩子（國小）',color:'#1D9E75', avatar:'小'},
+  {id:'kid2',  name:'孩子（國中）',color:'#EF9F27', avatar:'中'},
+];
+
+async function renderPersonal(c, ta) {
+  ta.innerHTML = `<button class="btn btn-sm" onclick="renderPersonal($('content'),$('topbar-actions'))">
+    <svg viewBox="0 0 13 13" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M11 6.5A4.5 4.5 0 1 1 7.5 2.1"/><polyline points="11,2 11,6 7,6"/></svg>
+    重新整理
+  </button>`;
+
+  const now = new Date();
+  const year = now.getFullYear(), month = now.getMonth();
+  const firstDay = new Date(year,month,1).getDay();
+  const daysInMonth = new Date(year,month+1,0).getDate();
+  const today = now.getDate();
+  const dayNames = ['日','一','二','三','四','五','六'];
+
+  // personal events stored locally
+  const pdata = readPersonalData();
+  const monthKey = year+'-'+String(month+1).padStart(2,'0');
+  const monthEvents = (pdata.events||[]).filter(e=>e.date && e.date.startsWith(monthKey));
+
+  // build calendar cells
+  let cells = '';
+  for(let i=0;i<firstDay;i++) cells+='<div></div>';
+  for(let d=1;d<=daysInMonth;d++){
+    const dateStr = year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const dayEvs = monthEvents.filter(e=>e.date===dateStr);
+    const isToday = d===today;
+    cells+=`<div style="min-height:60px;border:0.5px solid var(--border);border-radius:6px;padding:4px;cursor:pointer;background:${isToday?'var(--accent-l)':'var(--surface)'};position:relative"
+      onclick="openAddPersonalEvent('${dateStr}')">
+      <div style="font-size:12px;font-weight:${isToday?500:400};color:${isToday?'var(--accent)':'var(--text)'};margin-bottom:3px">${d}</div>
+      ${dayEvs.slice(0,3).map(ev=>`<div style="font-size:10px;padding:1px 4px;border-radius:3px;margin-bottom:1px;background:${ev.memberColor||'#888'}22;color:${ev.memberColor||'#888'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ev.title}</div>`).join('')}
+      ${dayEvs.length>3?`<div style="font-size:10px;color:var(--hint)">+${dayEvs.length-3}</div>`:''}
+    </div>`;
+  }
+
+  c.innerHTML = `
+  <div class="card">
+    <div class="card-head">
+      <span class="card-title">${year} 年 ${month+1} 月 — 家庭行事曆</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        ${FAMILY_MEMBERS.map(m=>`<span style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer" onclick="toggleMemberFilter('${m.id}')">
+          <span style="width:10px;height:10px;border-radius:50%;background:${m.color}" id="dot-${m.id}"></span>
+          <span style="color:var(--muted)">${m.name}</span>
+        </span>`).join('')}
+        <button class="btn btn-primary btn-sm" onclick="openAddPersonalEvent()">+ 新增</button>
+      </div>
+    </div>
+    <div style="padding:12px">
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:8px">
+        ${dayNames.map(d=>`<div style="text-align:center;font-size:11px;color:var(--hint);font-weight:500;padding:4px 0">${d}</div>`).join('')}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">${cells}</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span class="card-title">本月行程清單</span><span style="font-size:11px;color:var(--hint)">${monthEvents.length} 個事件</span></div>
+    ${monthEvents.length===0
+      ? '<div style="padding:20px;text-align:center;font-size:13px;color:var(--hint)">本月尚無行程，點擊日曆新增</div>'
+      : monthEvents.sort((a,b)=>a.date.localeCompare(b.date)).map(ev=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:0.5px solid var(--border)">
+      <div style="width:4px;height:32px;border-radius:2px;background:${ev.memberColor||'#888'};flex-shrink:0"></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:500">${esc(ev.title)}</div>
+        <div style="font-size:11px;color:var(--hint)">${ev.date} ${ev.time||''} · ${ev.member||'全家'}</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="deletePersonalEvent('${ev.id}')" style="color:var(--hint)">
+        <svg viewBox="0 0 12 12" width="11" height="11"><path d="M2 3h8M5 3V2h2v1M4 3v6M8 3v6M3 3l.5 7h5L9 3"/></svg>
+      </button>
+    </div>`).join('')}
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span class="card-title">小孩課表</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px">
+      ${['kid1','kid2'].map(kid=>{
+        const m=FAMILY_MEMBERS.find(x=>x.id===kid);
+        const schedule=(pdata.schedule||{})[kid]||{};
+        const days=['一','二','三','四','五'];
+        return`<div style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+          <div style="padding:10px 14px;background:${m.color}22;display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:13px;font-weight:500;color:${m.color}">${m.name}</span>
+            <button class="btn btn-sm" onclick="openEditSchedule('${kid}')" style="font-size:11px;padding:2px 8px">編輯課表</button>
+          </div>
+          <div style="padding:10px 14px">
+            ${days.map(d=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+              <span style="font-size:11px;color:var(--hint);width:14px">週${d}</span>
+              <span style="font-size:12px;color:var(--text)">${esc((schedule[d]||[]).join('、')||'—')}</span>
+            </div>`).join('')}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+function readPersonalData(){
+  try{ return JSON.parse(localStorage.getItem('ys_personal')||'{}'); }catch(e){ return {}; }
+}
+function savePersonalData(d){ localStorage.setItem('ys_personal', JSON.stringify(d)); }
+
+function openAddPersonalEvent(date){
+  const d = date||new Date().toISOString().split('T')[0];
+  openModal(`
+  <div class="modal-title">新增家庭行程</div>
+  <div class="form-row"><label class="form-label">標題 *</label><input class="form-ctrl" id="pe-title" placeholder="例：看醫生、親師座談"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="form-row"><label class="form-label">日期</label><input class="form-ctrl" id="pe-date" type="date" value="${d}"></div>
+    <div class="form-row"><label class="form-label">時間</label><input class="form-ctrl" id="pe-time" type="time"></div>
+  </div>
+  <div class="form-row"><label class="form-label">成員</label>
+    <select class="form-ctrl" id="pe-member">
+      <option value="全家">全家</option>
+      ${FAMILY_MEMBERS.map(m=>`<option value="${m.name}">${m.name}</option>`).join('')}
+    </select>
+  </div>
+  <div class="form-row"><label class="form-label">備註</label><input class="form-ctrl" id="pe-note" placeholder="選填"></div>
+  <div class="modal-btns">
+    <button class="btn" onclick="closeModal()">取消</button>
+    <button class="btn btn-primary" onclick="submitPersonalEvent()">新增</button>
+  </div>`, ()=>$('pe-title')&&$('pe-title').focus());
+}
+
+function submitPersonalEvent(){
+  const title=$('pe-title').value.trim(); if(!title)return;
+  const pdata=readPersonalData();
+  if(!pdata.events) pdata.events=[];
+  const memberName=$('pe-member').value;
+  const memberObj=FAMILY_MEMBERS.find(m=>m.name===memberName)||{color:'#888'};
+  pdata.events.push({
+    id:Date.now()+'',title,
+    date:$('pe-date').value,
+    time:$('pe-time').value,
+    member:memberName,
+    memberColor:memberObj.color,
+    note:$('pe-note').value
+  });
+  savePersonalData(pdata);
+  closeModal();
+  renderPersonal($('content'),$('topbar-actions'));
+}
+
+function deletePersonalEvent(id){
+  const pdata=readPersonalData();
+  pdata.events=(pdata.events||[]).filter(e=>e.id!==id);
+  savePersonalData(pdata);
+  renderPersonal($('content'),$('topbar-actions'));
+}
+
+function openEditSchedule(kid){
+  const m=FAMILY_MEMBERS.find(x=>x.id===kid);
+  const pdata=readPersonalData();
+  const schedule=(pdata.schedule||{})[kid]||{};
+  const days=['一','二','三','四','五'];
+  openModal(`
+  <div class="modal-title">${m.name} 課表設定</div>
+  ${days.map(d=>`
+  <div class="form-row">
+    <label class="form-label">週${d}</label>
+    <input class="form-ctrl" id="sch-${d}" placeholder="例：數學、英文" value="${esc((schedule[d]||[]).join('、'))}">
+  </div>`).join('')}
+  <div class="modal-btns">
+    <button class="btn" onclick="closeModal()">取消</button>
+    <button class="btn btn-primary" onclick="submitSchedule('${kid}')">儲存</button>
+  </div>`);
+}
+
+function submitSchedule(kid){
+  const pdata=readPersonalData();
+  if(!pdata.schedule) pdata.schedule={};
+  const days=['一','二','三','四','五'];
+  pdata.schedule[kid]={};
+  days.forEach(d=>{
+    const val=$('sch-'+d).value.trim();
+    pdata.schedule[kid][d]=val?val.split(/[、,，]+/).map(s=>s.trim()).filter(Boolean):[];
+  });
+  savePersonalData(pdata);
+  closeModal();
+  renderPersonal($('content'),$('topbar-actions'));
+}
+
+/* ═══════════════════ FAMILY TODO ═══════════════════ */
+function readFamilyData(){
+  try{ return JSON.parse(localStorage.getItem('ys_family')||'{"shopping":[],"chores":[],"todos":[]}'); }catch(e){ return {shopping:[],chores:[],todos:[]}; }
+}
+function saveFamilyData(d){ localStorage.setItem('ys_family',JSON.stringify(d)); }
+
+let familyTab='shopping';
+
+function renderFamily(c,ta){
+  ta.innerHTML=`<button class="btn btn-primary" onclick="openAddFamilyItem()">
+    <svg viewBox="0 0 12 12"><path d="M6 1v10M1 6h10"/></svg>新增
+  </button>`;
+  const fd=readFamilyData();
+  const tabs=[
+    {id:'shopping',label:'購物清單',icon:'M2 2h1l2 8h7l1-5H5'},
+    {id:'chores',  label:'家事分工',icon:'M2 12h12M4 12V7l4-4 4 4v5M9 12V9H7v3'},
+    {id:'todos',   label:'家庭代辦',icon:'M2 2h12v12H2zM5 7l2 2 4-4'},
+  ];
+  c.innerHTML=`
+  <div style="display:flex;gap:0;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px">
+    ${tabs.map(t=>`<button style="flex:1;padding:9px;border:none;font-family:var(--font);font-size:13px;cursor:pointer;background:${familyTab===t.id?'var(--accent-l)':'transparent'};color:${familyTab===t.id?'var(--accent)':'var(--muted)'};font-weight:${familyTab===t.id?500:400};transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px"
+      onclick="setFamilyTab('${t.id}')">
+      <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="${t.icon}"/></svg>
+      ${t.label}
+    </button>`).join('')}
+  </div>
+  <div id="family-content"></div>`;
+  renderFamilyContent();
+}
+
+function setFamilyTab(t){ familyTab=t; renderFamilyContent(); }
+
+function renderFamilyContent(){
+  const fd=readFamilyData();
+  const el=$('family-content'); if(!el)return;
+  const items=(fd[familyTab]||[]);
+
+  if(familyTab==='shopping'){
+    const categories=[...new Set(items.map(i=>i.cat||'其他'))];
+    el.innerHTML=`<div class="card">
+      <div class="card-head">
+        <span class="card-title">購物清單</span>
+        <span style="font-size:11px;color:var(--hint)">${items.filter(i=>!i.done).length} 項未購 / ${items.length} 項</span>
+      </div>
+      ${categories.map(cat=>`
+      <div style="padding:8px 16px 0;font-size:11px;font-weight:500;color:var(--hint);text-transform:uppercase;letter-spacing:.05em">${esc(cat)}</div>
+      ${items.filter(i=>(i.cat||'其他')===cat).map(i=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:0.5px solid var(--border)">
+        <div class="check-ring ${i.done?'checked':''}" onclick="toggleFamilyItem('shopping','${i.id}')">
+          <svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
+        </div>
+        <span style="flex:1;font-size:13px;${i.done?'text-decoration:line-through;color:var(--hint)':'color:var(--text)'}">${esc(i.text)}</span>
+        ${i.qty?`<span style="font-size:12px;color:var(--muted)">${esc(i.qty)}</span>`:''}
+        <button class="btn btn-ghost btn-sm" style="padding:2px 6px;color:var(--hint)" onclick="deleteFamilyItem('shopping','${i.id}')">
+          <svg viewBox="0 0 12 12" width="11" height="11"><path d="M2 3h8M5 3V2h2v1M4 3v6M8 3v6M3 3l.5 7h5L9 3"/></svg>
+        </button>
+      </div>`).join('')}`).join('')}
+      <div style="padding:10px 16px;border-top:0.5px solid var(--border);display:flex;gap:8px;background:var(--bg)">
+        <input class="add-inp" id="shop-inp" placeholder="新增商品..." onkeydown="if(event.key==='Enter')quickAddShopping()">
+        <button class="btn btn-primary" onclick="quickAddShopping()">新增</button>
+      </div>
+    </div>
+    <div style="text-align:right;margin-top:8px">
+      <button class="btn btn-sm" onclick="clearDoneShopping()" style="color:var(--muted)">清除已購項目</button>
+    </div>`;
+  }
+
+  else if(familyTab==='chores'){
+    el.innerHTML=`<div class="card">
+      <div class="card-head"><span class="card-title">家事分工</span><span style="font-size:11px;color:var(--hint)">本週</span></div>
+      ${items.length===0?'<div style="padding:20px;text-align:center;font-size:13px;color:var(--hint)">尚無家事任務</div>':
+        items.map(i=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:0.5px solid var(--border)">
+        <div class="check-ring ${i.done?'checked':''}" onclick="toggleFamilyItem('chores','${i.id}')">
+          <svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
+        </div>
+        <span style="flex:1;font-size:13px;${i.done?'text-decoration:line-through;color:var(--hint)':'color:var(--text)'}">${esc(i.text)}</span>
+        <span style="font-size:11px;padding:2px 8px;border-radius:10px;background:${(FAMILY_MEMBERS.find(m=>m.name===i.assignee)||{color:'#888'}).color}22;color:${(FAMILY_MEMBERS.find(m=>m.name===i.assignee)||{color:'#888'}).color}">${esc(i.assignee||'未指定')}</span>
+        <button class="btn btn-ghost btn-sm" style="padding:2px 6px;color:var(--hint)" onclick="deleteFamilyItem('chores','${i.id}')">
+          <svg viewBox="0 0 12 12" width="11" height="11"><path d="M2 3h8M5 3V2h2v1M4 3v6M8 3v6M3 3l.5 7h5L9 3"/></svg>
+        </button>
+      </div>`).join('')}
+      <div style="padding:10px 16px;border-top:0.5px solid var(--border);background:var(--bg);display:flex;gap:8px">
+        <input class="add-inp" id="chore-inp" placeholder="新增家事..." onkeydown="if(event.key==='Enter')quickAddChore()">
+        <button class="btn btn-primary" onclick="quickAddChore()">新增</button>
+      </div>
+    </div>`;
+  }
+
+  else {
+    el.innerHTML=`<div class="card">
+      <div class="card-head"><span class="card-title">家庭共用代辦</span></div>
+      ${items.length===0?'<div style="padding:20px;text-align:center;font-size:13px;color:var(--hint)">尚無家庭代辦事項</div>':
+        items.map(i=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:0.5px solid var(--border)">
+        <div class="check-ring ${i.done?'checked':''}" onclick="toggleFamilyItem('todos','${i.id}')">
+          <svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
+        </div>
+        <span style="flex:1;font-size:13px;${i.done?'text-decoration:line-through;color:var(--hint)':'color:var(--text)'}">${esc(i.text)}</span>
+        ${i.date?`<span style="font-size:11px;color:var(--hint);font-family:var(--mono)">${esc(i.date)}</span>`:''}
+        <button class="btn btn-ghost btn-sm" style="padding:2px 6px;color:var(--hint)" onclick="deleteFamilyItem('todos','${i.id}')">
+          <svg viewBox="0 0 12 12" width="11" height="11"><path d="M2 3h8M5 3V2h2v1M4 3v6M8 3v6M3 3l.5 7h5L9 3"/></svg>
+        </button>
+      </div>`).join('')}
+      <div style="padding:10px 16px;border-top:0.5px solid var(--border);background:var(--bg);display:flex;gap:8px">
+        <input class="add-inp" id="ftodo-inp" placeholder="新增家庭代辦..." onkeydown="if(event.key==='Enter')quickAddFamilyTodo()">
+        <button class="btn btn-primary" onclick="quickAddFamilyTodo()">新增</button>
+      </div>
+    </div>`;
+  }
+}
+
+function toggleFamilyItem(type,id){const fd=readFamilyData();const i=(fd[type]||[]).find(x=>x.id===id);if(i)i.done=!i.done;saveFamilyData(fd);renderFamilyContent();}
+function deleteFamilyItem(type,id){const fd=readFamilyData();fd[type]=(fd[type]||[]).filter(x=>x.id!==id);saveFamilyData(fd);renderFamilyContent();}
+function quickAddShopping(){const inp=$('shop-inp');const txt=inp.value.trim();if(!txt)return;const fd=readFamilyData();if(!fd.shopping)fd.shopping=[];fd.shopping.push({id:Date.now()+'',text:txt,cat:'其他',done:false});saveFamilyData(fd);inp.value='';renderFamilyContent();}
+function quickAddChore(){const inp=$('chore-inp');const txt=inp.value.trim();if(!txt)return;const fd=readFamilyData();if(!fd.chores)fd.chores=[];fd.chores.push({id:Date.now()+'',text:txt,assignee:'',done:false});saveFamilyData(fd);inp.value='';renderFamilyContent();}
+function quickAddFamilyTodo(){const inp=$('ftodo-inp');const txt=inp.value.trim();if(!txt)return;const fd=readFamilyData();if(!fd.todos)fd.todos=[];fd.todos.push({id:Date.now()+'',text:txt,done:false});saveFamilyData(fd);inp.value='';renderFamilyContent();}
+function clearDoneShopping(){const fd=readFamilyData();fd.shopping=(fd.shopping||[]).filter(i=>!i.done);saveFamilyData(fd);renderFamilyContent();}
+
+function openAddFamilyItem(){
+  const tabs={shopping:'購物清單',chores:'家事分工',todos:'家庭代辦'};
+  openModal(`
+  <div class="modal-title">新增${tabs[familyTab]||'項目'}</div>
+  <div class="form-row"><label class="form-label">名稱 *</label><input class="form-ctrl" id="fi-text" placeholder="輸入內容..."></div>
+  ${familyTab==='shopping'?`
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="form-row"><label class="form-label">分類</label>
+      <select class="form-ctrl" id="fi-cat">
+        <option>食品</option><option>清潔用品</option><option>生活用品</option><option>其他</option>
+      </select>
+    </div>
+    <div class="form-row"><label class="form-label">數量</label><input class="form-ctrl" id="fi-qty" placeholder="例：2包"></div>
+  </div>`:''}
+  ${familyTab==='chores'?`
+  <div class="form-row"><label class="form-label">負責人</label>
+    <select class="form-ctrl" id="fi-assign">
+      <option value="">未指定</option>
+      ${FAMILY_MEMBERS.map(m=>`<option value="${m.name}">${m.name}</option>`).join('')}
+    </select>
+  </div>`:''}
+  ${familyTab==='todos'?`
+  <div class="form-row"><label class="form-label">日期</label><input class="form-ctrl" id="fi-date" type="date"></div>`:''}
+  <div class="modal-btns">
+    <button class="btn" onclick="closeModal()">取消</button>
+    <button class="btn btn-primary" onclick="submitFamilyItem()">新增</button>
+  </div>`, ()=>$('fi-text')&&$('fi-text').focus());
+}
+
+function submitFamilyItem(){
+  const txt=$('fi-text').value.trim(); if(!txt)return;
+  const fd=readFamilyData();
+  if(!fd[familyTab]) fd[familyTab]=[];
+  const item={id:Date.now()+'',text:txt,done:false};
+  if(familyTab==='shopping'){item.cat=$('fi-cat')?$('fi-cat').value:'其他';item.qty=$('fi-qty')?$('fi-qty').value:'';}
+  if(familyTab==='chores'){item.assignee=$('fi-assign')?$('fi-assign').value:'';}
+  if(familyTab==='todos'){item.date=$('fi-date')?$('fi-date').value:'';}
+  fd[familyTab].push(item);
+  saveFamilyData(fd);
+  closeModal();
+  renderFamilyContent();
+}
+
+/* ═══════════════════ HEALTH TRACKER ═══════════════════ */
+function readHealthData(){
+  try{ return JSON.parse(localStorage.getItem('ys_health')||'{"weight":[],"exercise":[],"sleep":[],"food":[]}'); }catch(e){ return {weight:[],exercise:[],sleep:[],food:[]}; }
+}
+function saveHealthData(d){ localStorage.setItem('ys_health',JSON.stringify(d)); }
+
+let healthTab='weight';
+
+function renderHealth(c,ta){
+  ta.innerHTML=`<button class="btn btn-primary" onclick="openAddHealthRecord()">
+    <svg viewBox="0 0 12 12"><path d="M6 1v10M1 6h10"/></svg>新增記錄
+  </button>`;
+  const tabs=[
+    {id:'weight',  label:'體重', icon:'M4 2h8l-1 10H5L4 2zM2 2h2M10 2h2'},
+    {id:'exercise',label:'運動', icon:'M8 3a5 5 0 1 1 0 10A5 5 0 0 1 8 3zM8 7v-2M8 7h2'},
+    {id:'sleep',   label:'睡眠', icon:'M3 8A5 5 0 1 0 13 8M1 8h14'},
+    {id:'food',    label:'飲食', icon:'M5 2v5c0 2 1 3 3 3s3-1 3-3V2M8 10v4'},
+  ];
+  c.innerHTML=`
+  <div style="display:flex;gap:0;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px">
+    ${tabs.map(t=>`<button style="flex:1;padding:9px;border:none;font-family:var(--font);font-size:13px;cursor:pointer;background:${healthTab===t.id?'var(--accent-l)':'transparent'};color:${healthTab===t.id?'var(--accent)':'var(--muted)'};font-weight:${healthTab===t.id?500:400};transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px"
+      onclick="setHealthTab('${t.id}')">
+      <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="${t.icon}"/></svg>
+      ${t.label}
+    </button>`).join('')}
+  </div>
+  <div id="health-content"></div>`;
+  renderHealthContent();
+}
+
+function setHealthTab(t){ healthTab=t; renderHealthContent(); }
+
+function renderHealthContent(){
+  const hd=readHealthData();
+  const el=$('health-content'); if(!el)return;
+  const today=new Date().toISOString().split('T')[0];
+
+  if(healthTab==='weight'){
+    const data=(hd.weight||[]).slice(-30).reverse();
+    const latest=data[0];
+    const prev=data[1];
+    const diff=latest&&prev?((latest.value-prev.value).toFixed(1)):null;
+    el.innerHTML=`
+    <div class="stats-row" style="margin-bottom:16px">
+      <div class="stat-card"><div class="stat-label">最新體重</div><div class="stat-val">${latest?latest.value:'—'}<span style="font-size:14px;color:var(--muted)"> kg</span></div><div class="stat-sub">${latest?latest.date:'尚無記錄'}</div></div>
+      <div class="stat-card"><div class="stat-label">較上次</div><div class="stat-val" style="color:${diff>0?'var(--danger)':diff<0?'var(--success)':'var(--text)'}">${diff!==null?(diff>0?'+':'')+diff:'—'}<span style="font-size:14px"> kg</span></div><div class="stat-sub">${diff!==null?(diff>0?'增加':'減少'):'—'}</div></div>
+      <div class="stat-card"><div class="stat-label">記錄天數</div><div class="stat-val">${hd.weight.length}</div><div class="stat-sub">累計記錄</div></div>
+      <div class="stat-card">
+        <div class="stat-label">今日記錄</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+          <input type="number" id="w-val" step="0.1" placeholder="kg" class="form-ctrl" style="width:80px;padding:5px 8px">
+          <button class="btn btn-sm btn-primary" onclick="addWeightRecord()">記錄</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">體重記錄</span></div>
+      ${data.length===0?'<div style="padding:20px;text-align:center;font-size:13px;color:var(--hint)">尚無記錄</div>':
+        data.slice(0,14).map(r=>`<div style="display:flex;align-items:center;padding:9px 16px;border-bottom:0.5px solid var(--border);gap:12px">
+          <span style="font-size:12px;color:var(--hint);font-family:var(--mono);width:80px">${r.date}</span>
+          <span style="font-size:15px;font-weight:500;flex:1">${r.value} kg</span>
+          ${r.note?`<span style="font-size:12px;color:var(--muted)">${esc(r.note)}</span>`:''}
+          <button class="btn btn-ghost btn-sm" style="padding:2px 6px;color:var(--hint)" onclick="deleteHealthRecord('weight','${r.id}')">
+            <svg viewBox="0 0 12 12" width="11" height="11"><path d="M2 3h8M5 3V2h2v1M4 3v6M8 3v6M3 3l.5 7h5L9 3"/></svg>
+          </button>
+        </div>`).join('')}
+    </div>`;
+  }
+
+  else if(healthTab==='exercise'){
+    const data=(hd.exercise||[]).slice(-30).reverse();
+    const thisWeek=data.filter(r=>{const d=new Date(r.date),n=new Date();return (n-d)<7*86400000;});
+    el.innerHTML=`
+    <div class="stats-row" style="margin-bottom:16px">
+      <div class="stat-card"><div class="stat-label">本週運動</div><div class="stat-val">${thisWeek.length}</div><div class="stat-sub">次</div></div>
+      <div class="stat-card"><div class="stat-label">本週分鐘</div><div class="stat-val">${thisWeek.reduce((a,r)=>a+(r.duration||0),0)}</div><div class="stat-sub">分鐘</div></div>
+      <div class="stat-card"><div class="stat-label">累計記錄</div><div class="stat-val">${hd.exercise.length}</div><div class="stat-sub">次</div></div>
+      <div class="stat-card"><div class="stat-label">最近運動</div><div class="stat-val" style="font-size:14px">${data[0]?data[0].type:'—'}</div><div class="stat-sub">${data[0]?data[0].date:'尚無記錄'}</div></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">運動記錄</span></div>
+      ${data.length===0?'<div style="padding:20px;text-align:center;font-size:13px;color:var(--hint)">尚無記錄</div>':
+        data.slice(0,14).map(r=>`<div style="display:flex;align-items:center;padding:9px 16px;border-bottom:0.5px solid var(--border);gap:12px">
+          <span style="font-size:12px;color:var(--hint);font-family:var(--mono);width:80px">${r.date}</span>
+          <span class="tag tg-t" style="flex-shrink:0">${esc(r.type)}</span>
+          <span style="font-size:13px;flex:1">${r.duration?r.duration+'分鐘':''} ${r.steps?r.steps.toLocaleString()+'步':''}</span>
+          ${r.note?`<span style="font-size:12px;color:var(--muted)">${esc(r.note)}</span>`:''}
+          <button class="btn btn-ghost btn-sm" style="padding:2px 6px;color:var(--hint)" onclick="deleteHealthRecord('exercise','${r.id}')">
+            <svg viewBox="0 0 12 12" width="11" height="11"><path d="M2 3h8M5 3V2h2v1M4 3v6M8 3v6M3 3l.5 7h5L9 3"/></svg>
+          </button>
+        </div>`).join('')}
+    </div>`;
+  }
+
+  else if(healthTab==='sleep'){
+    const data=(hd.sleep||[]).slice(-30).reverse();
+    const avg=data.length?Math.round(data.reduce((a,r)=>a+(r.hours||0),0)/data.length*10)/10:0;
+    el.innerHTML=`
+    <div class="stats-row" style="margin-bottom:16px">
+      <div class="stat-card"><div class="stat-label">平均睡眠</div><div class="stat-val">${avg||'—'}<span style="font-size:14px;color:var(--muted)"> hr</span></div><div class="stat-sub">近30天</div></div>
+      <div class="stat-card"><div class="stat-label">昨晚睡眠</div><div class="stat-val">${data[0]?data[0].hours:'—'}<span style="font-size:14px;color:var(--muted)"> hr</span></div><div class="stat-sub">${data[0]?data[0].date:'尚無記錄'}</div></div>
+      <div class="stat-card"><div class="stat-label">累計記錄</div><div class="stat-val">${hd.sleep.length}</div><div class="stat-sub">天</div></div>
+      <div class="stat-card">
+        <div class="stat-label">今日快速記錄</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:6px">
+          <input type="number" id="sl-hours" step="0.5" min="0" max="24" placeholder="小時" class="form-ctrl" style="width:70px;padding:5px 8px">
+          <button class="btn btn-sm btn-primary" onclick="addSleepRecord()">記錄</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">睡眠記錄</span></div>
+      ${data.length===0?'<div style="padding:20px;text-align:center;font-size:13px;color:var(--hint)">尚無記錄</div>':
+        data.slice(0,14).map(r=>`<div style="display:flex;align-items:center;padding:9px 16px;border-bottom:0.5px solid var(--border);gap:12px">
+          <span style="font-size:12px;color:var(--hint);font-family:var(--mono);width:80px">${r.date}</span>
+          <div style="width:60px;height:6px;background:var(--bg);border-radius:3px;overflow:hidden"><div style="height:6px;border-radius:3px;background:${r.hours>=7?'var(--success)':r.hours>=6?'var(--warn)':'var(--danger)'};width:${Math.min(100,r.hours/9*100)}%"></div></div>
+          <span style="font-size:13px;font-weight:500;color:${r.hours>=7?'var(--success)':r.hours>=6?'var(--warn)':'var(--danger)'}">${r.hours} hr</span>
+          ${r.bedtime?`<span style="font-size:12px;color:var(--hint)">${r.bedtime}入睡</span>`:''}
+          <button class="btn btn-ghost btn-sm" style="padding:2px 6px;color:var(--hint)" onclick="deleteHealthRecord('sleep','${r.id}')">
+            <svg viewBox="0 0 12 12" width="11" height="11"><path d="M2 3h8M5 3V2h2v1M4 3v6M8 3v6M3 3l.5 7h5L9 3"/></svg>
+          </button>
+        </div>`).join('')}
+    </div>`;
+  }
+
+  else {
+    const data=(hd.food||[]).slice(-30).reverse();
+    el.innerHTML=`
+    <div class="card">
+      <div class="card-head"><span class="card-title">飲食日記</span><span style="font-size:11px;color:var(--hint)">${data.length} 筆記錄</span></div>
+      ${data.length===0?'<div style="padding:20px;text-align:center;font-size:13px;color:var(--hint)">尚無記錄</div>':
+        data.slice(0,14).map(r=>`<div style="padding:10px 16px;border-bottom:0.5px solid var(--border)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">
+            <span style="font-size:13px;font-weight:500">${esc(r.meal)} — ${esc(r.food)}</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              ${r.cal?`<span style="font-size:12px;color:var(--muted)">${r.cal} kcal</span>`:''}
+              <button class="btn btn-ghost btn-sm" style="padding:2px 6px;color:var(--hint)" onclick="deleteHealthRecord('food','${r.id}')">
+                <svg viewBox="0 0 12 12" width="11" height="11"><path d="M2 3h8M5 3V2h2v1M4 3v6M8 3v6M3 3l.5 7h5L9 3"/></svg>
+              </button>
+            </div>
+          </div>
+          <span style="font-size:11px;color:var(--hint);font-family:var(--mono)">${r.date}</span>
+        </div>`).join('')}
+    </div>`;
+  }
+}
+
+function addWeightRecord(){
+  const val=parseFloat($('w-val').value);
+  if(!val||val<20||val>300){alert('請輸入正確體重（20-300 kg）');return;}
+  const hd=readHealthData();
+  hd.weight.push({id:Date.now()+'',date:new Date().toISOString().split('T')[0],value:val});
+  saveHealthData(hd);
+  renderHealthContent();
+}
+
+function addSleepRecord(){
+  const hrs=parseFloat($('sl-hours').value);
+  if(!hrs||hrs<0||hrs>24){alert('請輸入正確睡眠時數');return;}
+  const hd=readHealthData();
+  if(!hd.sleep)hd.sleep=[];
+  hd.sleep.push({id:Date.now()+'',date:new Date().toISOString().split('T')[0],hours:hrs});
+  saveHealthData(hd);
+  renderHealthContent();
+}
+
+function deleteHealthRecord(type,id){
+  const hd=readHealthData();
+  hd[type]=(hd[type]||[]).filter(r=>r.id!==id);
+  saveHealthData(hd);
+  renderHealthContent();
+}
+
+function openAddHealthRecord(){
+  const tabs={weight:'體重',exercise:'運動',sleep:'睡眠',food:'飲食'};
+  const today=new Date().toISOString().split('T')[0];
+  openModal(`
+  <div class="modal-title">新增${tabs[healthTab]||''}記錄</div>
+  <div class="form-row"><label class="form-label">日期</label><input class="form-ctrl" id="hr-date" type="date" value="${today}"></div>
+  ${healthTab==='weight'?`
+  <div class="form-row"><label class="form-label">體重 (kg) *</label><input class="form-ctrl" id="hr-val" type="number" step="0.1" placeholder="例：65.5"></div>
+  <div class="form-row"><label class="form-label">備註</label><input class="form-ctrl" id="hr-note" placeholder="選填"></div>`:''}
+  ${healthTab==='exercise'?`
+  <div class="form-row"><label class="form-label">運動類型 *</label>
+    <select class="form-ctrl" id="hr-type">
+      <option>跑步</option><option>走路</option><option>騎車</option><option>游泳</option><option>重訓</option><option>瑜珈</option><option>其他</option>
+    </select>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="form-row"><label class="form-label">時間（分鐘）</label><input class="form-ctrl" id="hr-dur" type="number" placeholder="例：30"></div>
+    <div class="form-row"><label class="form-label">步數</label><input class="form-ctrl" id="hr-steps" type="number" placeholder="例：8000"></div>
+  </div>
+  <div class="form-row"><label class="form-label">備註</label><input class="form-ctrl" id="hr-note" placeholder="選填"></div>`:''}
+  ${healthTab==='sleep'?`
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="form-row"><label class="form-label">睡眠時數 *</label><input class="form-ctrl" id="hr-hours" type="number" step="0.5" placeholder="例：7.5"></div>
+    <div class="form-row"><label class="form-label">入睡時間</label><input class="form-ctrl" id="hr-bed" type="time" placeholder="例：23:00"></div>
+  </div>`:''}
+  ${healthTab==='food'?`
+  <div class="form-row"><label class="form-label">餐別</label>
+    <select class="form-ctrl" id="hr-meal"><option>早餐</option><option>午餐</option><option>晚餐</option><option>點心</option></select>
+  </div>
+  <div class="form-row"><label class="form-label">食物內容 *</label><input class="form-ctrl" id="hr-food" placeholder="例：雞胸肉飯、蔬菜"></div>
+  <div class="form-row"><label class="form-label">熱量（kcal）</label><input class="form-ctrl" id="hr-cal" type="number" placeholder="例：450"></div>`:''}
+  <div class="modal-btns">
+    <button class="btn" onclick="closeModal()">取消</button>
+    <button class="btn btn-primary" onclick="submitHealthRecord()">儲存</button>
+  </div>`);
+}
+
+function submitHealthRecord(){
+  const hd=readHealthData();
+  const date=$('hr-date').value||new Date().toISOString().split('T')[0];
+  const id=Date.now()+'';
+  if(healthTab==='weight'){
+    const val=parseFloat($('hr-val').value);
+    if(!val){alert('請輸入體重');return;}
+    hd.weight.push({id,date,value:val,note:$('hr-note').value});
+  } else if(healthTab==='exercise'){
+    hd.exercise.push({id,date,type:$('hr-type').value,duration:parseInt($('hr-dur').value)||0,steps:parseInt($('hr-steps').value)||0,note:$('hr-note').value});
+  } else if(healthTab==='sleep'){
+    const hrs=parseFloat($('hr-hours').value);
+    if(!hrs){alert('請輸入睡眠時數');return;}
+    hd.sleep.push({id,date,hours:hrs,bedtime:$('hr-bed').value});
+  } else if(healthTab==='food'){
+    const food=$('hr-food').value.trim();
+    if(!food){alert('請輸入食物內容');return;}
+    hd.food.push({id,date,meal:$('hr-meal').value,food,cal:parseInt($('hr-cal').value)||0});
+  }
+  saveHealthData(hd);
+  closeModal();
+  renderHealthContent();
+}
+
+
+
+/* ── 刪除專案 / 任務 ── */
+function confirmDeleteProject(projId){
+  const p=projects.find(x=>x.id===projId);
+  if(!p) return;
+  openModal(`
+  <div class="modal-title">確認刪除專案</div>
+  <div style="padding:12px 0 20px;font-size:13px;color:var(--text)">
+    確定要刪除「<strong>${esc(p.name)}</strong>」嗎？<br>
+    <span style="color:var(--danger);font-size:12px">此操作無法復原，專案內所有任務也會一併刪除。</span>
+  </div>
+  <div class="modal-btns">
+    <button class="btn" onclick="closeModal()">取消</button>
+    <button class="btn" style="background:var(--danger);color:#fff;border-color:var(--danger)" onclick="deleteProject(${projId})">確認刪除</button>
+  </div>`);
+}
+
+function deleteProject(projId){
+  projects=projects.filter(x=>x.id!==projId);
+  save();
+  closeModal();
+  closeDetail();
+  render();
+}
+
+function confirmDeleteTask(projId, taskId){
+  const p=projects.find(x=>x.id===projId);
+  if(!p) return;
+  const t=(p.tasks||[]).find(x=>x.id===taskId);
+  if(!t) return;
+  openModal(`
+  <div class="modal-title">確認刪除任務</div>
+  <div style="padding:12px 0 20px;font-size:13px;color:var(--text)">
+    確定要刪除任務「<strong>${esc(t.title)}</strong>」嗎？<br>
+    <span style="color:var(--danger);font-size:12px">此操作無法復原，任務內所有討論也會一併刪除。</span>
+  </div>
+  <div class="modal-btns">
+    <button class="btn" onclick="closeModal()">取消</button>
+    <button class="btn" style="background:var(--danger);color:#fff;border-color:var(--danger)" onclick="deleteTask(${projId},${taskId})">確認刪除</button>
+  </div>`);
+}
+
+function deleteTask(projId, taskId){
+  const p=projects.find(x=>x.id===projId);
+  if(!p) return;
+  p.tasks=(p.tasks||[]).filter(x=>x.id!==taskId);
+  save();
+  closeModal();
+  // refresh detail panel if open
+  if(document.getElementById('detail-mount').innerHTML) openProjectDetail(projId);
+  else render();
+}
+
+/* ─── Init ─── */
+(async () => {
+  const data = await loadFromServer();
+  if (data) {
+    if (data.todos && data.todos.length)    todos    = data.todos;
+    if (data.projects && data.projects.length) {
+      projects = data.projects.map(p=>{
+        if (!p.tasks || p.tasks.length===0) {
+          const def = DEFAULT_PROJECTS.find(d=>d.id===p.id);
+          if (def) return {...p, tasks:def.tasks, progress:def.progress};
+        }
+        return p;
+      });
+    }
+    if (data.notes)    notes    = data.notes;
+    if (data.settings) {
+      dark = !!data.settings.dark;
+      if (dark) document.documentElement.setAttribute('data-theme','dark');
+      updateThemeIcon();
+    }
+  }
+  // 若資料還是空的，用 DEFAULT 補上
+  if (!todos.length) todos = DEFAULT_TODOS;
+  if (!projects.length) projects = DEFAULT_PROJECTS;
+
+  // 處理 URL 參數
+  const urlParams = new URLSearchParams(window.location.search);
+  const authResult = urlParams.get('auth');
+  const restored   = urlParams.get('restored');
+
+  if (restored === '1') {
+    window.history.replaceState({}, '', '/');
+    render();
+    setTimeout(()=>{
+      const tip = document.createElement('div');
+      tip.style.cssText='position:fixed;bottom:20px;right:20px;background:#0F6E56;color:#E1F5EE;padding:12px 20px;border-radius:10px;font-size:13px;z-index:999';
+      tip.textContent = '✓ 資料已成功還原！';
+      document.body.appendChild(tip);
+      setTimeout(()=>tip.remove(), 3000);
+    }, 300);
+  } else if (authResult === 'success') {
+    window.history.replaceState({}, '', '/');
+    showView('calendar');
+    setTimeout(()=>{
+      const tip = document.createElement('div');
+      tip.style.cssText='position:fixed;bottom:20px;right:20px;background:#0F6E56;color:#E1F5EE;padding:10px 18px;border-radius:10px;font-size:13px;z-index:999;animation:fadein .3s ease';
+      tip.textContent = 'Google 帳號授權成功！';
+      document.body.appendChild(tip);
+      setTimeout(()=>tip.remove(), 3000);
+    }, 500);
+  } else if (authResult === 'error') {
+    window.history.replaceState({}, '', '/');
+    const tip = document.createElement('div');
+    tip.style.cssText='position:fixed;bottom:20px;right:20px;background:#A32D2D;color:#FCEBEB;padding:10px 18px;border-radius:10px;font-size:13px;z-index:999';
+    tip.textContent = '授權失敗，請重試';
+    document.body.appendChild(tip);
+    setTimeout(()=>tip.remove(), 4000);
+  } else {
+    render();
+  }
+})();
+</script>
+</body>
+</html>

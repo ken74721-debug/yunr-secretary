@@ -1,0 +1,12 @@
+{
+  "name": "yunr-secretary",
+  "version": "1.0.0",
+  "description": "芸兒小秘書 — 個人工作管理系統",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "芸兒",
+  "license": "ISC"
+}
