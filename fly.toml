@@ -1,4 +1,4 @@
-app = "yunr-secretary"
+app = "yunr-sec-kenchiu"
 primary_region = "nrt"
 
 [build]
