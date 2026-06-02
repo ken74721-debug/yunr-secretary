@@ -425,7 +425,12 @@ async function renderHealth(c, ta) {
   ta.innerHTML = `
     <button class="btn btn-primary" onclick="p3OpenHealthLog('${today}')">
       <svg viewBox="0 0 12 12"><path d="M6 1v10M1 6h10"/></svg>今日記錄
-    </button>`;
+    </button>
+    <button class="btn" onclick="p3ImportMiFitness()" title="匯入小米運動健康資料">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M7 2v8M4 7l3 3 3-3"/><path d="M2 11h10"/></svg>
+      匯入 Mi Fitness
+    </button>
+    <input type="file" id="p3-mifi-inp" accept=".json,application/json" style="display:none" onchange="p3HandleMiFitnessFile(this)">`;
 
   // 計算最近 7 天平均
   const last7 = healthLogs.slice(0,7);
@@ -450,9 +455,13 @@ async function renderHealth(c, ta) {
     ${healthLogs.length===0
       ? `<div style="padding:40px;text-align:center">
           <div style="font-size:13px;color:var(--hint);margin-bottom:12px">還沒有健康記錄，點擊「今日記錄」開始追蹤</div>
-          <div style="font-size:11px;color:var(--hint);max-width:300px;margin:0 auto;line-height:1.6">
-            💡 Google Fit REST API 已於 2025年5月關閉。<br>
-            目前使用手動記錄，同樣可追蹤步數、睡眠、飲水、心情、體重。
+          <div style="font-size:11px;color:var(--muted);max-width:360px;margin:0 auto;line-height:1.8;text-align:left;background:var(--bg);padding:12px 16px;border-radius:8px">
+            💡 <b>小米運動健康匯入方式：</b><br>
+            1. 打開 <b>小米運動健康</b> App<br>
+            2. 我的 → 設定 → 匯出使用者資料<br>
+            3. 解壓縮後找到 <code>ACTIVITY_STAGE.json</code> 或步數/睡眠 JSON<br>
+            4. 點擊右上角「匯入 Mi Fitness」上傳<br>
+            <span style="color:var(--hint)">（Google Fit API 已於 2025/5 關閉）</span>
           </div>
         </div>`
       : `<table style="width:100%;border-collapse:collapse;font-size:12px">
@@ -532,6 +541,60 @@ async function p3SaveHealthLog(date) {
   await fetch('/api/health',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(log)});
   document.getElementById('p3-health-modal').innerHTML='';
   renderHealth(document.getElementById('content'), document.getElementById('topbar-actions'));
+}
+
+
+/* ═══════════════════ Mi Fitness 匯入 ═══════════════════ */
+function p3ImportMiFitness() {
+  const inp = document.getElementById('p3-mifi-inp');
+  if (inp) inp.click();
+}
+
+async function p3HandleMiFitnessFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const c = document.getElementById('content');
+  const ta = document.getElementById('topbar-actions');
+
+  // 顯示載入提示
+  const banner = document.createElement('div');
+  banner.id = 'p3-mifi-banner';
+  banner.style.cssText = 'position:fixed;top:56px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:8px 20px;border-radius:0 0 10px 10px;font-size:13px;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.2)';
+  banner.textContent = '⏳ 解析 Mi Fitness 資料中…';
+  document.body.appendChild(banner);
+
+  try {
+    const text = await file.text();
+    const raw = JSON.parse(text);
+    const resp = await fetch('/api/health/import', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(raw)
+    });
+    const result = await resp.json();
+    banner.remove();
+    if (!result.ok) {
+      p3MiFiBanner(`❌ 匯入失敗：${result.error}`, 'var(--danger)', 5000);
+      return;
+    }
+    p3MiFiBanner(`✅ 成功匯入 ${result.imported} 天的健康資料！`, 'var(--success)', 3000);
+    renderHealth(c, ta);
+  } catch(e) {
+    banner.remove();
+    p3MiFiBanner(`❌ 檔案格式錯誤：${e.message}`, 'var(--danger)', 5000);
+  }
+  input.value = '';
+}
+
+function p3MiFiBanner(msg, color, duration) {
+  const old = document.getElementById('p3-mifi-banner');
+  if (old) old.remove();
+  const el = document.createElement('div');
+  el.id = 'p3-mifi-banner';
+  el.style.cssText = `position:fixed;top:56px;left:50%;transform:translateX(-50%);background:${color};color:#fff;padding:8px 20px;border-radius:0 0 10px 10px;font-size:13px;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:opacity .5s`;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; setTimeout(()=>el.remove(), 500); }, duration);
 }
 
 /* ── 共用 esc helper（若 index.html 已定義則跳過）── */

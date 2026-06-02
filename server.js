@@ -520,6 +520,101 @@ const server=http.createServer(async (req,res)=>{
     return json(res,writeData(data)?200:500,{ok:true});
   }
 
+
+  // ─ Mi Fitness / 健康資料 JSON 匯入 ─
+  if (pn==='/api/health/import'&&m==='POST'){
+    let b=''; req.on('data',c=>b+=c);
+    req.on('end',()=>{
+      try{
+        const raw = JSON.parse(b);
+        const data = readData();
+        data.healthLogs = data.healthLogs||[];
+
+        // ── 解析各種 Mi Fitness 匯出格式 ──
+        function toDateStr(v) {
+          if (!v) return null;
+          const s = String(v).trim();
+          // 20240101 → 2024-01-01
+          if (/^\d{8}$/.test(s)) return s.slice(0,4)+'-'+s.slice(4,6)+'-'+s.slice(6,8);
+          // 2024-01-01T... → 2024-01-01
+          if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
+          // 2024/01/01 → 2024-01-01
+          if (/^\d{4}\/\d{2}\/\d{2}/.test(s)) return s.replace(/\//g,'-').slice(0,10);
+          return null;
+        }
+        function toH(minutes) { return minutes ? +(minutes/60).toFixed(1) : undefined; }
+
+        const merged = {};  // date → log object
+
+        // 格式 A：{ step_record:[{date,steps,distance,calories}], sleep_record:[{date,deepSleepTime,shallowSleepTime}] }
+        const stepRec = raw.step_record||raw.stepRecord||[];
+        const sleepRec = raw.sleep_record||raw.sleepRecord||[];
+        stepRec.forEach(r=>{
+          const d=toDateStr(r.date||r.dateTime); if(!d)return;
+          merged[d]=merged[d]||{date:d};
+          if(r.steps) merged[d].steps=r.steps;
+          if(r.distance) merged[d].distance_m=r.distance;
+          if(r.calories||r.calorie) merged[d].calories=r.calories||r.calorie;
+        });
+        sleepRec.forEach(r=>{
+          const d=toDateStr(r.date||r.startTime||r.dateTime); if(!d)return;
+          merged[d]=merged[d]||{date:d};
+          const total=(r.deepSleepTime||0)+(r.shallowSleepTime||r.lightSleepTime||0)+(r.remSleepTime||0);
+          if(total>0) merged[d].sleep=toH(total);
+        });
+
+        // 格式 B：{ data:[{date,steps,distance,calorie,deepSleep,lightSleep}] }
+        const dataArr = raw.data||raw.items||raw.records||[];
+        if(Array.isArray(dataArr)){
+          dataArr.forEach(r=>{
+            const d=toDateStr(r.date||r.dateTime||r.day); if(!d)return;
+            merged[d]=merged[d]||{date:d};
+            if(r.steps) merged[d].steps=r.steps;
+            if(r.distance||r.distance_m) merged[d].distance_m=r.distance||r.distance_m;
+            if(r.calorie||r.calories) merged[d].calories=r.calorie||r.calories;
+            // 睡眠（分鐘轉小時）
+            const sleepMin=(r.deepSleep||0)+(r.lightSleep||r.shallowSleep||0)+(r.remSleep||0);
+            if(sleepMin>0) merged[d].sleep=toH(sleepMin);
+            // 睡眠（小時直接存）
+            if(r.sleep&&!merged[d].sleep) merged[d].sleep=r.sleep;
+            if(r.weight) merged[d].weight=r.weight;
+          });
+        }
+
+        // 格式 C：頂層單日 {date, steps, sleep, ...}（單筆）
+        if(raw.date && (raw.steps||raw.sleep)){
+          const d=toDateStr(raw.date); if(d){
+            merged[d]=merged[d]||{date:d};
+            if(raw.steps) merged[d].steps=raw.steps;
+            if(raw.sleep) merged[d].sleep=raw.sleep;
+            if(raw.weight) merged[d].weight=raw.weight;
+            if(raw.water) merged[d].water=raw.water;
+          }
+        }
+
+        const imported = Object.values(merged);
+        if(!imported.length) return json(res,400,{ok:false,error:'找不到可辨識的健康資料，請確認是 Mi Fitness 匯出的 JSON 格式'});
+
+        // 合併到現有記錄（以日期為主鍵，保留手動填寫的欄位如 water/mood）
+        imported.forEach(log=>{
+          const idx=data.healthLogs.findIndex(l=>l.date===log.date);
+          if(idx>=0){
+            // 只覆蓋 Mi Fitness 有的欄位，保留手動填的 mood/water/note
+            if(log.steps) data.healthLogs[idx].steps=log.steps;
+            if(log.sleep) data.healthLogs[idx].sleep=log.sleep;
+            if(log.weight) data.healthLogs[idx].weight=log.weight;
+            if(log.calories) data.healthLogs[idx].calories=log.calories;
+          } else {
+            data.healthLogs.push(log);
+          }
+        });
+        data.healthLogs.sort((a,b)=>new Date(b.date)-new Date(a.date));
+        writeData(data);
+        json(res,200,{ok:true,imported:imported.length,sample:imported[0]});
+      }catch(e){ json(res,400,{ok:false,error:'JSON 解析失敗：'+e.message}); }
+    }); return;
+  }
+
   // ─ LINE ─
   if (pn==='/api/line/test'&&m==='POST'){
     try{
